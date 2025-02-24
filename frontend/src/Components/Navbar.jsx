@@ -1,57 +1,54 @@
-'use client';
-import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+'use client'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const Navbar = () => {
-  const router = useRouter();
+  const router = useRouter()
 
   // State variables
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [login, setLogin] = useState(false);
-  const [profileSrc, setProfileSrc] = useState('');
-  const [isClient, setIsClient] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [login, setLogin] = useState(false)
+  const [profileSrc, setProfileSrc] = useState('')
 
-  // Function to check login status and set profile image
+  // Check if window is available
+  const isServer = () => typeof window !== 'undefined'
+
+  // Check login status and set profile image
   const toggleLogin = () => {
-    if (typeof window !== 'undefined') {
-      const email = localStorage.getItem('email');
-      const src = localStorage.getItem('src') || '/default-profile.png'; // Fallback image
-      setLogin(!!email);
-      setProfileSrc(src);
+    if (isServer()) {
+      const email = localStorage.getItem('email')
+      const src = localStorage.getItem('src')
+      setLogin(!!email)
+      setProfileSrc(src || '')
     }
-  };
+  }
 
   // Logout function
   const logout = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('email');
-      localStorage.removeItem('src');
+    if (isServer()) {
+      localStorage.removeItem('email')
+      localStorage.removeItem('src')
     }
-    setLogin(false);
-    setProfileSrc('');
-    router.push('/');
-  };
+    setLogin(false)
+    setProfileSrc('')
+    router.push('/')
+  }
 
   // Redirect to login page
   const Login = () => {
-    router.push('/login');
-  };
+    router.push('/login')
+  }
 
   // Run on component mount
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setIsClient(true);
-      toggleLogin();
-    }
-  }, []);
+    toggleLogin()
+  }, [])
 
   // Handle mouse events for profile menu
-  const handleMouseEnter = () => setIsMenuOpen(true);
-  const handleMouseLeave = () => setIsMenuOpen(false);
-
-  if (!isClient) return null; // Prevents SSR mismatch errors
+  const handleMouseEnter = () => setIsMenuOpen(true)
+  const handleMouseLeave = () => setIsMenuOpen(false)
 
   return (
     <nav className="bg-black py-3 px-6 flex justify-between items-center">
@@ -65,21 +62,11 @@ const Navbar = () => {
 
       {/* Desktop Menu */}
       <ul className="hidden md:flex space-x-8 text-white font-bold">
-        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>
-          Home
-        </li>
-        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>
-          Blogs
-        </li>
-        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => (login ? router.push('/upload-blog') : router.push('/login'))}>
-          Upload Blog
-        </li>
-        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>
-          About Us
-        </li>
-        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>
-          Contact Us
-        </li>
+        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>Home</li>
+        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>Blogs</li>
+        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => login ? router.push('/upload-blog') : router.push('/login')}>Upload Blog</li>
+        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>About Us</li>
+        <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>Contact Us</li>
       </ul>
 
       {/* Mobile Hamburger Menu */}
@@ -98,7 +85,11 @@ const Navbar = () => {
       </div>
 
       {/* Profile Menu */}
-      <div className="relative hidden md:block" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      <div
+        className="relative hidden md:block"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
         {profileSrc ? (
           <img
             src={profileSrc}
@@ -119,19 +110,30 @@ const Navbar = () => {
               className="absolute right-0 mt-2 bg-[#1c1c1e] border border-gray-700 text-white rounded-md shadow-lg p-3 w-56 z-10"
             >
               <ul className="space-y-2">
-                <li className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200" onClick={() => (login ? router.push('/user-profile') : router.push('/login'))}>
+                <li
+                  className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200"
+                  onClick={() => login ? router.push('/user-profile') : router.push('/login')}
+                >
                   {login ? 'Profile' : 'Login'}
                 </li>
 
                 {login && (
-                  <li className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200" onClick={() => router.push('/my-blogs')}>
+                  <li
+                    className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200"
+                    onClick={() => router.push('/my-blogs')}
+                  >
                     My Blogs
                   </li>
                 )}
 
-                <li className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200">Settings</li>
+                <li className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200">
+                  Settings
+                </li>
 
-                <li className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200" onClick={() => (login ? logout() : Login())}>
+                <li
+                  className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200"
+                  onClick={() => login ? logout() : Login()}
+                >
                   {login ? 'Logout' : 'Login'}
                 </li>
               </ul>
@@ -144,26 +146,16 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="absolute top-full left-0 w-full bg-black text-white p-4 md:hidden">
           <ul className="space-y-4">
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>
-              Home
-            </li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>
-              Blogs
-            </li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => (login ? router.push('/upload-blog') : router.push('/login'))}>
-              Upload Blog
-            </li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>
-              About Us
-            </li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>
-              Contact Us
-            </li>
+            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>Home</li>
+            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>Blogs</li>
+            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => login ? router.push('/upload-blog') : router.push('/login')}>Upload Blog</li>
+            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>About Us</li>
+            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>Contact Us</li>
           </ul>
         </div>
       )}
     </nav>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default Navbar
