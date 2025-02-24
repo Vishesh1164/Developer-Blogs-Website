@@ -5,12 +5,14 @@ const blogRouter = require('./routers/blogRouter');
 const contactRouter = require('./routers/contactRouter');
 const thoughtRouter = require('./routers/thoughtRouter');
 const cors = require('cors');
+require('dotenv').config();
 
 // Creating n express app
 
 const app = express();
 
-const port =5000;
+const port =process.env.PORT;
+
 
 app.use(cors({
     origin:  ['http://localhost:3000']
