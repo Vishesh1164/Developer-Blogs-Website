@@ -57,7 +57,7 @@ const UploadBlog = () => {
 
       setSubmitting(true);
       axios
-        .post('http://localhost:5000/blog/add', values, {
+        .post(`${NEXT_PUBLIC_API_URL}/blog/add`, values, {
           headers: { 'x-auth-token': token }
         })
         .then(() => {

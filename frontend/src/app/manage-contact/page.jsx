@@ -25,7 +25,7 @@ const ManageContact = () => {
   const deleteContact = async (id) => {
     if (!confirm('Are you sure you want to delete?')) return
 
-    const res = await axios.delete(`http://localhost:5000/contact/delete/${id}`)
+    const res = await axios.delete(`${NEXT_PUBLIC_API_URL}/contact/delete/${id}`)
     if (res.status === 200) {
       fetchContacts()
       toast.success('Contact deleted successfully')

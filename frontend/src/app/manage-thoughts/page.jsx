@@ -12,7 +12,7 @@ const Managethought = () => {
   
   const fetchthoughts = async () =>{
     setloading(true)
-    const res= await axios.get('http://localhost:5000/thought/getall')
+    const res= await axios.get(`${NEXT_PUBLIC_API_URL}/thought/getall`)
     console.log(res.data)
     setthoughtList(res.data)
     setloading(false)
@@ -25,7 +25,7 @@ const Managethought = () => {
   const deletethought = async (id) => {
     if (!confirm('Are you sure you want to delete?')) return
 
-    const res = await axios.delete(`http://localhost:5000/thought/delete/${id}`)
+    const res = await axios.delete(`${NEXT_PUBLIC_API_URL}/thought/delete/${id}`)
     if (res.status === 200) {
       fetchthoughts(res)
       toast.success('thought deleted successfully')

@@ -15,7 +15,7 @@ const UpdateContact = () => {
   const [contactData, setcontactData] = useState([])
 
   const fetchContactDat = async () => {
-    const res = await axios.get(`http://localhost:5000/contact/getbyid/${id}`)
+    const res = await axios.get(`${NEXT_PUBLIC_API_URL}/contact/getbyid/${id}`)
     console.log(res.data)
     setcontactData(res.data)
   }

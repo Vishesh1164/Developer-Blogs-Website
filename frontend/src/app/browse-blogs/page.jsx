@@ -5,6 +5,7 @@ import Vlog from '../../Components/Vlog';
 import { motion } from 'framer-motion';
 import { IconLoader3 } from '@tabler/icons-react';
 
+
 const BrowseBlogs = () => {
   const [blog, setBlog] = useState([]);
   const [masterList, setMasterList] = useState([]);
@@ -12,7 +13,7 @@ const BrowseBlogs = () => {
 
   const fetchBlog = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/blog/getall');
+      const res = await axios.get(`${NEXT_PUBLIC_API_URL}/blog/getall`);
       if (res.status === 200) {
         const data = [...res.data];
         setBlog(data);

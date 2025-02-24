@@ -53,7 +53,7 @@ const Userprofile = () => {
 
   const fetchUserData = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/user/getuser', {
+      const res = await axios.get(`${NEXT_PUBLIC_API_URL}/user/getuser`, {
         headers: { 'x-auth-token': token },
       });
       setUserData(res.data);
@@ -71,7 +71,7 @@ const Userprofile = () => {
     values.profileImage = image || userData?.profileImage;
 
     try {
-      const res = await axios.put('http://localhost:5000/user/update', values, {
+      const res = await axios.put(`${NEXT_PUBLIC_API_URL}/user/update`, values, {
         headers: { 'x-auth-token': token },
       });
 
