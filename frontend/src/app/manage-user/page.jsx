@@ -12,7 +12,7 @@ const ManageUser = () => {
   
   const fetchUsers = async () =>{
     setloading(true)
-    const res= await axios.get(`${NEXT_PUBLIC_API_URL}/user/getall`)
+    const res= await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getall`)
     console.log(res.data)
     setUserList(res.data)
     setloading(false)
@@ -25,7 +25,7 @@ const ManageUser = () => {
   const deleteUser = async (id) => {
     if (!confirm('Are you sure you want to delete?')) return
 
-    const res = await axios.delete(`${NEXT_PUBLIC_API_URL}/user/delete/${id}`)
+    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/user/delete/${id}`)
     if (res.status === 200) {
       fetchUsers(res)
       toast.success('User deleted successfully')

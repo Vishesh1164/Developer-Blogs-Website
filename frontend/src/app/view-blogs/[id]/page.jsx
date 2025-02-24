@@ -13,7 +13,7 @@ const ViewBlog = () => {
 
   const fetchBlog = async () => {
     try {
-      const res = await axios.get(`${NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`);
       if (res.status === 200) {
         setBlogDetails(res.data);
       }

@@ -21,7 +21,7 @@ const router = useRouter()
       return
     }
       try {
-        const res = await axios.get(`${NEXT_PUBLIC_API_URL}/blog/getbyemail/${localStorage.getItem('email')}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyemail/${localStorage.getItem('email')}`);
         if (res.status === 200) {
           const data = [...res.data];
           console.log(data);
@@ -39,7 +39,7 @@ const router = useRouter()
 
       if(!confirm('Are you sure you want to delete')) return
   
-      const res = await axios.delete(`${NEXT_PUBLIC_API_URL}/blog/delete/${id}`)
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/blog/delete/${id}`)
       if(res.status===200){
         fetchBlog(res)
          toast.success('Blog deleted successfully')

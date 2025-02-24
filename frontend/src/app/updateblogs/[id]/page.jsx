@@ -34,7 +34,7 @@ const UpdateBlog = () => {
       return
     }
     try {
-      const res = await axios.get(`${NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`);
       if (res.status === 200) {
         setBlogdata(res.data);
       }
@@ -58,7 +58,7 @@ const UpdateBlog = () => {
 
     values.profileImage = image || values.profileImage;
     try {
-      const res = await axios.put(`${NEXT_PUBLIC_API_URL}/blog/update/${id}`, values, {
+      const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/blog/update/${id}`, values, {
         headers: { 'x-auth-token': token },
       });
       if (res.status === 200) {
