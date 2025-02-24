@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-
-const url ="mongodb+srv://srivastavavishesh59:Vishesh123@cluster0.oms1z.mongodb.net/mernproject?retryWrites=true&w=majority&appName=Cluster0";
+require('dotenv').config();
+const url =process.env.MONGO_URL;
 
 // asynchronous function - returns promise
 mongoose.connect(url)
