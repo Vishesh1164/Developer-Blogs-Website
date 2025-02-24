@@ -22,7 +22,7 @@ const Home = () => {
 
   const fetchBlog = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/blog/getall');
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall`);
       if (res.status === 200) {
         let data = res.data.slice(0, 6);
         setLatest(data);
@@ -45,7 +45,7 @@ const Home = () => {
         return;
       }
 
-      axios.post('http://localhost:5000/thought/add', values)
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/thought/add`, values)
         .then(() => {
           toast.success('Sent successfully');
           resetForm();
