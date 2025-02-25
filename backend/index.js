@@ -16,7 +16,7 @@ const port =process.env.PORT;
 
 app.use(cors({
     methods: ['GET', 'POST','PUT','DELETE'],
-    origin:  ["https://developer-blogs-website.vercel.app/"]
+    origin:  ["https://developer-blogs-website.vercel.app"]
 }));
 app.use(express.json());
 app.use('/user', userRouter);
