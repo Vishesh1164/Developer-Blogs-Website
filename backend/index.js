@@ -16,8 +16,8 @@ const port =process.env.PORT;
 
 app.use(cors({
     methods: ['GET', 'POST','PUT','DELETE'],
-    // origin:  ["https://developer-blogs-website.vercel.app"]
-    origin: ['http://localhost:3000']
+    origin:  ["https://developer-blogs-website.vercel.app"]
+    // origin: ['http://localhost:3000']
 }));
 app.use(express.json());
 app.use('/user', userRouter);
