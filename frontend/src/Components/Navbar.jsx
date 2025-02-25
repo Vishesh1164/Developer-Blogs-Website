@@ -72,6 +72,7 @@ const Navbar = () => {
       {/* Mobile Hamburger Menu */}
       <div className="md:hidden">
         <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {console.log(isMobileMenuOpen)}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-8 w-8 text-white"
@@ -144,16 +145,23 @@ const Navbar = () => {
 
       {/* Mobile Menu List */}
       {isMobileMenuOpen && (
-        <div className="absolute top-full left-0 w-full bg-black text-white p-4 md:hidden -z-50">
-          <ul className="space-y-4">
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>Home</li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>Blogs</li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => login ? router.push('/upload-blog') : router.push('/login')}>Upload Blog</li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>About Us</li>
-            <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>Contact Us</li>
-          </ul>
-        </div>
-      )}
+  <div className="fixed top-0 left-0 w-full h-screen bg-black text-white p-4 md:hidden z-[999]">
+    <button
+      onClick={() => setIsMobileMenuOpen(false)}
+      className="absolute top-4 right-6 text-white text-2xl"
+    >
+      ✕
+    </button>
+    <ul className="space-y-6 text-center mt-16 text-xl font-bold">
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>Home</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>Blogs</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => login ? router.push('/upload-blog') : router.push('/login')}>Upload Blog</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>About Us</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>Contact Us</li>
+    </ul>
+  </div>
+)}
+
     </nav>
   )
 }
