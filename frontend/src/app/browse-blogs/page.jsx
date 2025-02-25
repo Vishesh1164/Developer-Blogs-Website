@@ -13,6 +13,7 @@ const BrowseBlogs = () => {
 
   const fetchBlog = async () => {
     try {
+      console.log(process.env.NEXT_PUBLIC_API_URL)
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall`);
       if (res.status === 200) {
         const data = [...res.data];
