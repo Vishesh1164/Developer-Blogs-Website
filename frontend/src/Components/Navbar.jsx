@@ -61,7 +61,7 @@ const Navbar = () => {
       </h1>
 
       {/* Desktop Menu */}
-      <ul className="sm:hidden flex space-x-8 text-white font-bold">
+      <ul className="hidden md:flex space-x-8 text-white font-bold">
         <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>Home</li>
         <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>Blogs</li>
         <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => login ? router.push('/upload-blog') : router.push('/login')}>Upload Blog</li>
