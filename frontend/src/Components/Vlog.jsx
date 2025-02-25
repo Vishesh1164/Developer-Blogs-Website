@@ -4,7 +4,6 @@ import Link from 'next/link'
 import React from 'react'
 
 const Vlog = ({ id, title, description, cover, user, src }) => {
-
   return (
     <>
       {/* Card Blog */}
@@ -17,7 +16,7 @@ const Vlog = ({ id, title, description, cover, user, src }) => {
             href={'/view-blogs/' + id}
           >
             <div className="w-full sm:w-[100%] lg:w-[100%]">
-              <Image
+              <img
                 className="w-full object-cover rounded-xl"
                 src={cover}
                 alt="Blog Image"
@@ -32,7 +31,7 @@ const Vlog = ({ id, title, description, cover, user, src }) => {
               </p>
             </div>
             <div className="mt-auto flex items-center gap-x-3">
-              <Image
+              <img
                 className="size-8 rounded-full"
                 src={src}
                 alt="Avatar"
