@@ -7,7 +7,7 @@ const Vlog = ({ id, title, description, cover, user, src }) => {
   return (
     <>
       {/* Card Blog */}
-      <div className="max-w-full sm:max-w-[30rem] sm:min-w-[20rem] px-4 py-5 sm:px-6 lg:px-5 lg:py-10 mx-auto bg-black">
+      <div className="max-w-[40%] sm:max-w-[30rem] sm:min-w-[20rem] px-4 py-5 sm:px-6 lg:px-5 lg:py-10 mx-auto bg-black">
 
         <div className="grid sm:grid-cols-1 lg:grid-cols-1 gap-6">
           {/* Card */}
@@ -32,7 +32,7 @@ const Vlog = ({ id, title, description, cover, user, src }) => {
             </div>
             <div className="mt-auto flex items-center gap-x-3">
               <img
-                className="size-8 rounded-full"
+                className="size-8  rounded-full"
                 src={src}
                 alt="Avatar"
               />
