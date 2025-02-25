@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Image from 'next/image';
 import Link from 'next/link'
 import React from 'react'
 
@@ -16,7 +17,7 @@ const Vlog = ({ id, title, description, cover, user, src }) => {
             href={'/view-blogs/' + id}
           >
             <div className="w-full sm:w-[100%] lg:w-[100%]">
-              <img
+              <Image
                 className="w-full object-cover rounded-xl"
                 src={cover}
                 alt="Blog Image"
@@ -31,7 +32,7 @@ const Vlog = ({ id, title, description, cover, user, src }) => {
               </p>
             </div>
             <div className="mt-auto flex items-center gap-x-3">
-              <img
+              <Image
                 className="size-8 rounded-full"
                 src={src}
                 alt="Avatar"
