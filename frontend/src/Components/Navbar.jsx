@@ -144,7 +144,8 @@ const Navbar = () => {
       </div>
 
       {/* Mobile Menu List */}
-      {isMobileMenuOpen && (
+{/* Mobile Menu List */}
+{isMobileMenuOpen && (
   <div className="fixed top-0 left-0 w-full h-screen bg-black text-white p-4 md:hidden z-[999]">
     <button
       onClick={() => setIsMobileMenuOpen(false)}
@@ -153,14 +154,15 @@ const Navbar = () => {
       ✕
     </button>
     <ul className="space-y-6 text-center mt-16 text-xl font-bold">
-      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/')}>Home</li>
-      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/browse-blogs')}>Blogs</li>
-      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => login ? router.push('/upload-blog') : router.push('/login')}>Upload Blog</li>
-      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/about')}>About Us</li>
-      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => router.push('/contact')}>Contact Us</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => { router.push('/'); setIsMobileMenuOpen(false); }}>Home</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => { router.push('/browse-blogs'); setIsMobileMenuOpen(false); }}>Blogs</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => { login ? router.push('/upload-blog') : router.push('/login'); setIsMobileMenuOpen(false); }}>Upload Blog</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => { router.push('/about'); setIsMobileMenuOpen(false); }}>About Us</li>
+      <li className="cursor-pointer hover:text-[#58A6FF]" onClick={() => { router.push('/contact'); setIsMobileMenuOpen(false); }}>Contact Us</li>
     </ul>
   </div>
 )}
+
 
     </nav>
   )
