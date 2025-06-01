@@ -1,66 +1,74 @@
-"use client";
+'use client';
 
-import axios from "axios";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import axios from 'axios';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 const BlogManagementPage = () => {
-const router = useRouter()
+  const router = useRouter();
 
-  const [Blog, setBlog] = useState([])
-  const [MasterList, setMasterList] = useState([])
-  const [Loading, setLoading] = useState(false)
-  const fetchBlog = async () => {
+  const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    if(!localStorage.getItem('token')){
-      toast.custom("Please login first")
-      router.push('/login')
+  // Fetch blogs of logged in user
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      // Request with credentials so cookies are sent
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyemail`, {
+        withCredentials: true,
+      });
 
-      return
+      if (res.status === 200) {
+        setBlogs(res.data);
+      }
+    } catch (err) {
+      console.error('Error fetching blogs:', err);
+      // If unauthorized, redirect to login
+      if (err.response?.status === 401) {
+        toast.error('Please login first');
+        router.push('/login');
+      } else {
+        toast.error('Failed to load blogs');
+      }
+    } finally {
+      setLoading(false);
     }
-      try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyemail/${localStorage.getItem('email')}`);
-        if (res.status === 200) {
-          const data = [...res.data];
-          console.log(data);
-          setBlog(data);
-          setMasterList(data);
-          setLoading(false);
-        }
-      } catch (err) {
-        console.log('Error fetching blogs:', err);
-        setLoading(false);
-      }
-    };
-
-    const deleteblog = async (id)=>{
-
-      if(!confirm('Are you sure you want to delete')) return
-  
-      const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/blog/delete/${id}`)
-      if(res.status===200){
-        fetchBlog(res)
-         toast.success('Blog deleted successfully')
-      }
-      else{
-        toast.error('Failed to delete Blog')
-      }
-      
-    }
-  
-    useEffect(() => {
-      fetchBlog();
-    }, []);
-
-  const handleEdit = (blog) => {
-    alert(`Editing blog: ${blog.title}`);
   };
 
-  const handleDelete = (blog) => {
-    alert(`Deleting blog: ${blog.title}`);
+  const deleteBlog = async (id) => {
+    if (!confirm('Are you sure you want to delete?')) return;
+
+    try {
+      const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/blog/delete/${id}`, {
+        withCredentials: true,
+      });
+
+      if (res.status === 200) {
+        toast.success('Blog deleted successfully');
+        fetchBlogs(); // refresh blog list after deletion
+      } else {
+        toast.error('Failed to delete blog');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      toast.error('Failed to delete blog');
+    }
   };
+
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-900 text-gray-300">
+        <p className="text-xl">Loading blogs...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 min-h-screen text-white">
@@ -72,48 +80,50 @@ const router = useRouter()
       </header>
 
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Blog.map((blog) => (
-            <div
-              key={blog._id}
-              className="bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition duration-300 overflow-hidden"
-            >
-              <img
-                src={blog.cover}
-                alt={blog.title}
-                className="w-full h-48 object-cover"
-              />
+        {blogs.length === 0 ? (
+          <p className="text-center text-gray-400">No blogs found. Start creating some!</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {blogs.map((blog) => (
+              <div
+                key={blog._id}
+                className="bg-gray-800 rounded-lg shadow-lg hover:shadow-xl transition duration-300 overflow-hidden"
+              >
+                <img
+                  src={blog.cover}
+                  alt={blog.title}
+                  className="w-full h-48 object-cover"
+                />
 
-              <div className="p-6">
-                {/* Blog Title */}
-                <h2 className="text-xl font-bold text-teal-300 mb-2">
-                  {blog.title}
-                </h2>
+                <div className="p-6">
+                  {/* Blog Title */}
+                  <h2 className="text-xl font-bold text-teal-300 mb-2">{blog.title}</h2>
 
-                {/* Blog Description */}
-                <p className="text-gray-300 mb-4">{blog.description}</p>
+                  {/* Blog Description */}
+                  <p className="text-gray-300 mb-4">{blog.description}</p>
 
-                <div className="flex justify-between items-center">
-                  {/* Edit Button */}
-                  <Link
-                   href={"/updateblogs/"+blog._id}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow transition duration-300"
-                  >
-                    Edit
-                  </Link>
+                  <div className="flex justify-between items-center">
+                    {/* Edit Button */}
+                    <Link
+                      href={`/updateblogs/${blog._id}`}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow transition duration-300"
+                    >
+                      Edit
+                    </Link>
 
-                  {/* Delete Button */}
-                  <button
-                    onClick={() => deleteblog(blog._id)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition duration-300"
-                  >
-                    Delete
-                  </button>
+                    {/* Delete Button */}
+                    <button
+                      onClick={() => deleteBlog(blog._id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg shadow transition duration-300"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </main>
 
       <footer className="text-center py-6 border-t border-gray-700">

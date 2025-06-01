@@ -1,14 +1,13 @@
-const { Schema, model } = require('../connection')
+const { Schema, model } = require('../connection');
 
 const mySchema = new Schema({
-    name: String,
-    email: {type: String, unique: true},
-    password: {type: String, required: true},
-    profileImage: {type: String, default:'https://via.placeholder.com/150'},
-    createdAt: {type: Date, default: Date.now()},
-    bio: {type: String, default:'unknown'},
-    
+  name: { type: String, required: true },
+  email: { type: String, unique: true, required: true, lowercase: true },
+  password: { type: String, required: true },
+  profileImage: { type: String, default: 'https://via.placeholder.com/150' },
+  bio: { type: String, default: 'unknown' },
+  role: { type: String, enum: ['user', 'admin'], default: 'user' },
+  createdAt: { type: Date, default: Date.now },
+});
 
-})
-
-module.exports = model('users', mySchema)
+module.exports = model('users', mySchema);

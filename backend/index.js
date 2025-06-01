@@ -1,36 +1,56 @@
-// Impoorting express 
+// Importing express 
 const express = require('express');
 const userRouter = require('./routers/userRouter');
-const blogRouter = require('./routers/blogRouter');
+const projectRouter = require('./routers/blogRouter');
+const mongoSanitize = require('express-mongo-sanitize');
 const contactRouter = require('./routers/contactRouter');
-const thoughtRouter = require('./routers/thoughtRouter');
 const cors = require('cors');
 require('dotenv').config();
+const cookieParser = require('cookie-parser');
 
-// Creating n express app
 
+
+// Creating an express app
 const app = express();
+app.use(cookieParser());
+app.use(mongoSanitize());
+// Use PORT from env or default to 5000
+const port = process.env.PORT || 5000;
 
-const port =process.env.PORT;
+// CORS setup
+app.use(
+  cors({
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: ['http://localhost:3000'],
+     credentials: true, // You can add more origins or use a function for dynamic origins
+  })
+);
 
-
-app.use(cors({
-    methods: ['GET', 'POST','PUT','DELETE'],
-    origin:  ["https://developer-blogs-website.vercel.app"]
-    // origin: ['http://localhost:3000']
-}));
+// Middleware to parse JSON bodies
 app.use(express.json());
+
+// Routes setup
 app.use('/user', userRouter);
-app.use('/blog', blogRouter);
+app.use('/blog', projectRouter);
 app.use('/contact', contactRouter);
-app.use('/thought', thoughtRouter);
 
-//route or endpoint
+// Root route - health check
 app.get('/', (req, res) => {
-    res.send('response from express')
-})
+  res.send('Response from Express server');
+});
 
+// 404 handler for unmatched routes
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
 
+// Global error handler (optional but recommended)
+app.use((err, req, res, next) => {
+  console.error('Global error:', err.stack);
+  res.status(500).json({ message: 'Internal Server Error' });
+});
 
-
-app.listen(port, ()=>{console.log('Server started')})
+// Start the server
+app.listen(port, () => {
+  console.log(`Server started on port ${port}`);
+});

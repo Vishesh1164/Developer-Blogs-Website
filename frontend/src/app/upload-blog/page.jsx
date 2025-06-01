@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion'; 
 import { useRouter } from 'next/navigation';
 
-// Handle ResizeObserver issue
 if (typeof window !== 'undefined' && !window.ResizeObserver) {
   global.ResizeObserver = class {
     observe() {}
@@ -17,7 +16,6 @@ if (typeof window !== 'undefined' && !window.ResizeObserver) {
   };
 }
 
-// Dynamically import Markdown Editor (Fixes SSR issues)
 const MarkdownEditor = dynamic(() => import('@uiw/react-markdown-editor'), { ssr: false });
 
 const UploadBlog = () => {
@@ -25,20 +23,26 @@ const UploadBlog = () => {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState(null);
 
-  // Ensure client-side execution
-  const isServer = () => typeof window !== 'undefined';
-  const token = isServer() ? localStorage.getItem('token') : null;
-
-  // Check authentication and redirect if not logged in
+  // Check if user is authenticated by calling backend
   useEffect(() => {
-    if (!token) {
-      router.push('/login');
-      toast.error("Please login first");
-    }
-  }, [token, router]);
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
+          withCredentials: true,
+        });
+        setIsAuthenticated(true);
+        setUserData(res.data);
+      } catch {
+        toast.error('Please login first');
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, [router]);
 
-  // Formik for blog upload
   const uploadBlog = useFormik({
     initialValues: {
       title: '',
@@ -49,29 +53,30 @@ const UploadBlog = () => {
       email: '',
       src: '',
     },
-    onSubmit: (values, { resetForm, setSubmitting }) => {
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
       values.content = contentValue;
-      values.email = isServer() ? localStorage.getItem('email') : '';
-      values.publishedBy = isServer() ? localStorage.getItem('name') : '';
-      values.src = isServer() ? localStorage.getItem('src') : '';
+      // Use userData from auth check, no localStorage
+      values.email = userData?.email || '';
+      values.publishedBy = userData?.name || '';
+      values.src = userData?.src || '';
 
       setSubmitting(true);
-      axios
-        .post(`${process.env.NEXT_PUBLIC_API_URL}/blog/add`, values, {
-          headers: { 'x-auth-token': token }
-        })
-        .then(() => {
-          toast.success('Blog uploaded successfully!');
-          resetForm();
-        })
-        .catch((err) => {
-          toast.error(err?.response?.data?.message || 'Something went wrong');
-          setSubmitting(false);
+      try {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/blog/add`, values, {
+          withCredentials: true, // send HTTP-only cookie automatically
         });
+        toast.success('Blog uploaded successfully!');
+        resetForm();
+        setImage(null);
+        setContentValue('');
+      } catch (err) {
+        toast.error(err?.response?.data?.message || 'Something went wrong');
+      } finally {
+        setSubmitting(false);
+      }
     },
   });
 
-  // Image Upload Function
   const uploadImage = async (e) => {
     const file = e.target.files[0];
     const formData = new FormData();
@@ -87,13 +92,21 @@ const UploadBlog = () => {
       );
       setImage(res.data.url);
       uploadBlog.setFieldValue('cover', res.data.url);
-      setLoading(false);
       toast.success('Image uploaded successfully!');
-    } catch (err) {
-      setLoading(false);
+    } catch {
       toast.error('Image upload failed!');
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex justify-center items-center text-white">
+        Checking authentication...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-10 flex justify-center items-center">
@@ -139,7 +152,6 @@ const UploadBlog = () => {
           {/* Blog Details Form */}
           <div className="flex-1">
             <form onSubmit={uploadBlog.handleSubmit} className="space-y-6">
-              {/* Blog Title */}
               <input
                 type="text"
                 id="title"
@@ -147,9 +159,9 @@ const UploadBlog = () => {
                 value={uploadBlog.values.title}
                 onChange={uploadBlog.handleChange}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
+                required
               />
 
-              {/* Blog Description */}
               <input
                 type="text"
                 id="description"
@@ -157,9 +169,9 @@ const UploadBlog = () => {
                 value={uploadBlog.values.description}
                 onChange={uploadBlog.handleChange}
                 className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
+                required
               />
 
-              {/* Markdown Editor with Scroll */}
               <div className="space-y-4">
                 <div className="relative">
                   <MarkdownEditor
@@ -167,17 +179,16 @@ const UploadBlog = () => {
                     onChange={setContentValue}
                     className="rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 text-gray-200"
                     minHeight={200}
-                    maxHeight={500} 
+                    maxHeight={500}
                     width="100%"
                     style={{
-                      maxHeight: '400px', 
+                      maxHeight: '400px',
                       overflowY: 'auto',
                     }}
                   />
                 </div>
               </div>
 
-              {/* Submit Button */}
               <motion.button
                 type="submit"
                 className="w-full bg-blue-600 text-white text-lg font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"

@@ -1,4 +1,5 @@
 'use client';
+
 import MarkdownEditor from '@uiw/react-markdown-editor';
 import axios from 'axios';
 import { Formik } from 'formik';
@@ -15,26 +16,15 @@ const UpdateBlog = () => {
   const [blogdata, setBlogdata] = useState(null);
   const [load, setLoad] = useState(true);
   const [error, setError] = useState(null);
-  const [token, setToken] = useState(null);
 
   const router = useRouter();
-  const isServer= () =>typeof window !== 'undefined';
 
-
-  useEffect(() => {
-    const storedToken = isServer() &&localStorage.getItem('token');
-    setToken(storedToken);
-  }, []);
-
+  // Fetch blog details
   const fetchBlog = async () => {
-    if(!localStorage.getItem('token')){
-      toast.custom("Please login first")
-      router.push('/login')
-
-      return
-    }
     try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`);
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`, {
+        withCredentials: true, // send HTTP-only cookies automatically
+      });
       if (res.status === 200) {
         setBlogdata(res.data);
       }
@@ -50,29 +40,33 @@ const UpdateBlog = () => {
     fetchBlog();
   }, [id]);
 
+  // Update blog API call
   const updateBlog = async (values) => {
-    if (!token) {
-      toast.error('Authentication token missing.');
-      return;
+    // Use uploaded image if changed
+    if (image) {
+      values.profileImage = image;
     }
-
-    values.profileImage = image || values.profileImage;
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/blog/update/${id}`, values, {
-        headers: { 'x-auth-token': token },
-      });
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/blog/update/${id}`,
+        values,
+        {
+          withCredentials: true, // send cookies automatically for auth
+        }
+      );
       if (res.status === 200) {
         toast.success('Blog updated successfully!');
-        router.push('/my-blogs')
-        console.log(values)
+        router.push('/my-blogs');
       } else {
         toast.error('An error occurred during the update.');
       }
     } catch (err) {
-      console.log('Error updating the blog:', err);
+      console.error('Error updating the blog:', err);
       toast.error('Failed to update the blog. Please try again later.');
     }
   };
+
+  // Image upload handler
   const updateImage = async (e) => {
     const file = e.target.files[0];
     const formData = new FormData();
@@ -80,7 +74,6 @@ const UpdateBlog = () => {
     formData.append('upload_preset', 'preset2832');
     formData.append('cloud_name', 'dshlv1jgu');
     setLoading(true);
-  
 
     try {
       const res = await axios.post(
@@ -99,7 +92,7 @@ const UpdateBlog = () => {
   if (load) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900 text-gray-300">
-        <PuffLoader size={150} color="#58A6FF" loading={loading} />
+        <PuffLoader size={150} color="#58A6FF" loading={true} />
       </div>
     );
   }
@@ -123,7 +116,9 @@ const UpdateBlog = () => {
         <h1 className="text-4xl font-semibold text-center mb-8 text-gray-100">
           Update Blog
         </h1>
+
         <div className="flex flex-col lg:flex-row gap-8">
+          {/* Image Upload */}
           <div className="flex-1 bg-gray-700 p-6 border-2 border-dashed border-gray-600 rounded-xl">
             <label htmlFor="image" className="cursor-pointer text-lg text-gray-400">
               <div className="text-center">
@@ -135,6 +130,12 @@ const UpdateBlog = () => {
                   <img
                     src={image}
                     alt="Uploaded"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                ) : blogdata?.profileImage ? (
+                  <img
+                    src={blogdata.profileImage}
+                    alt="Current"
                     className="w-full h-full object-cover rounded-xl"
                   />
                 ) : (
@@ -150,6 +151,8 @@ const UpdateBlog = () => {
               />
             </label>
           </div>
+
+          {/* Blog Form */}
           <div className="flex-1">
             {blogdata === null ? (
               <p className="text-center my-5 text-gray-500 font-bold text-2xl">
@@ -162,6 +165,7 @@ const UpdateBlog = () => {
                     <input
                       type="text"
                       id="title"
+                      name="title"
                       placeholder="Blog Title"
                       onChange={updateForm.handleChange}
                       value={updateForm.values.title}
@@ -170,6 +174,7 @@ const UpdateBlog = () => {
                     <input
                       type="text"
                       id="description"
+                      name="description"
                       placeholder="Description"
                       onChange={updateForm.handleChange}
                       value={updateForm.values.description}

@@ -7,27 +7,33 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 const Userprofile = () => {
-  const isClient = () => typeof window !== 'undefined';
+  const router = useRouter();
 
   const [isEditing, setIsEditing] = useState(false);
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState(null);
 
-  const token = isClient() && localStorage.getItem('token');
-
   const handleEditToggle = () => setIsEditing(!isEditing);
-  const auth = () =>{
-    if(!localStorage.getItem('token')){
-      toast.custom("Please login first")
-      router.push('/login')
-  
-      return
+
+  // Check login by trying to fetch user data
+  const fetchUserData = async () => {
+    try {
+      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
+        withCredentials: true, // send cookies with request
+      });
+      setUserData(res.data);
+      setImage(res.data.profileImage);
+    } catch (err) {
+      toast.error('Please login first');
+      router.push('/login');
     }
-  }
-  
-  useEffect(()=>{auth()},[])
-  
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
   const uploadImage = async (e) => {
     const file = e.target.files[0];
     const formData = new FormData();
@@ -44,43 +50,30 @@ const Userprofile = () => {
       );
       setImage(res.data.url);
       toast.success('Image uploaded successfully!');
-    } catch (err) {
+    } catch {
       toast.error('Image upload failed!');
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchUserData = async () => {
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
-        headers: { 'x-auth-token': token },
-      });
-      setUserData(res.data);
-      setImage(res.data.profileImage);
-    } catch (err) {
-      toast.error('Failed to fetch user data!');
-    }
-  };
-
-  useEffect(() => {
-    if (token) fetchUserData();
-  }, [token]);
-
-  const updateForm = async (values) => {
+  const updateForm = async (values, { setSubmitting }) => {
     values.profileImage = image || userData?.profileImage;
 
     try {
       const res = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/user/update`, values, {
-        headers: { 'x-auth-token': token },
+        withCredentials: true,
       });
 
       if (res.status === 200) {
         toast.success('User updated successfully!');
         setIsEditing(false);
+        fetchUserData();
       }
-    } catch (err) {
+    } catch {
       toast.error('Failed to update user data!');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -113,12 +106,19 @@ const Userprofile = () => {
             </div>
           )}
           <h1 className="text-3xl font-bold mb-2">Profile</h1>
-          <p className="text-gray-400 mb-4">
-            {isClient() && localStorage.getItem('email')}
-          </p>
+          <p className="text-gray-400 mb-4">{userData.email}</p>
         </div>
 
-        <Formik initialValues={userData} onSubmit={updateForm}>
+        <Formik
+          initialValues={{
+            name: userData?.name || '',
+            email: userData?.email || '',
+            password: '',
+            bio: userData?.bio || '',
+          }}
+          enableReinitialize
+          onSubmit={updateForm}
+        >
           {({ handleSubmit, handleChange, values, isSubmitting }) => (
             <form onSubmit={handleSubmit}>
               {['name', 'email', 'password', 'bio'].map((field) => (
@@ -134,11 +134,7 @@ const Userprofile = () => {
                       placeholder={`Enter your ${field}`}
                     />
                   ) : (
-                    <p>
-                      {field === 'password'
-                        ? '********'
-                        : userData[field] || `No ${field} provided`}
-                    </p>
+                    <p>{field === 'password' ? '********' : userData[field] || `No ${field} provided`}</p>
                   )}
                 </div>
               ))}
@@ -155,7 +151,7 @@ const Userprofile = () => {
                 ) : (
                   <div
                     onClick={handleEditToggle}
-                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md"
+                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md cursor-pointer"
                   >
                     Edit Profile
                   </div>

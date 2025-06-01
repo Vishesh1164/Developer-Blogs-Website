@@ -2,8 +2,8 @@ const { Schema, model } = require('../connection')
 
 const mySchema = new Schema({
     name: String,
-    email: {type: String, unique: true},
-    thought: {type: String, unique: true},
+    email: {type: String, required: true},
+    thought: {type: String, required: true},
     createdAt: {type: Date, default: Date.now()},
 
     

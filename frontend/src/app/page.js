@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Carousal from '../Components/Carousal';
 import Vlog from '../Components/Vlog';
-import Testemonial from '../Components/Testemonial';
+import Testemonial from '../Components/Testemonial';  // fixed typo here if any
 import Footer from '../Components/Footer';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -13,48 +13,61 @@ import toast from 'react-hot-toast';
 import { IconLoader3 } from '@tabler/icons-react';
 
 const Home = () => {
-  const isServer = typeof window === 'undefined';
   const router = useRouter();
   const [latest, setLatest] = useState([]);
   const { ref: featuredRef, inView: featuredInView } = useInView();
   const { ref: thoughtRef, inView: thoughtInView } = useInView();
   const { ref: vlogsRef, inView: vlogsInView } = useInView();
 
+  // States to hold localStorage values after mount (to avoid SSR issues)
+  const [storedName, setStoredName] = useState('');
+  const [storedEmail, setStoredEmail] = useState('');
+  const [token, setToken] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setStoredName(localStorage.getItem('name') || '');
+      setStoredEmail(localStorage.getItem('email') || '');
+      setToken(localStorage.getItem('token') || '');
+    }
+  }, []);
+
   const fetchBlog = async () => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall`);
       if (res.status === 200) {
-        let data = res.data.slice(0, 6);
-        setLatest(data);
+        setLatest(res.data.slice(0, 6));
       }
     } catch (error) {
-      console.error("Error fetching blogs:", error);
+      console.log("Error fetching blogs:", error);
     }
   };
 
   const thoughtForm = useFormik({
+    enableReinitialize: true, // important to update initialValues on token change
     initialValues: {
-      name: !isServer ? localStorage.getItem('name') : '',
-      email: !isServer ? localStorage.getItem('email') : '',
+      name: storedName,
+      email: storedEmail,
       thought: '',
     },
-    onSubmit: (values, { resetForm, setSubmitting }) => {
-      if (isServer || !localStorage.getItem('token')) {
+    onSubmit: async (values, { resetForm, setSubmitting }) => {
+      if (!token) {
         toast.error('Please login to send thoughts');
         router.push('/login');
+        setSubmitting(false);
         return;
       }
 
-      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/thought/add`, values)
-        .then(() => {
-          toast.success('Sent successfully');
-          resetForm();
-          router.push('/');
-        }).catch((err) => {
-          console.log(err);
-          toast.error(err?.response?.data?.message || 'Something went wrong');
-          setSubmitting(false);
-        });
+      try {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/thought/add`, values, { withCredentials: true });
+        toast.success('Sent successfully');
+        resetForm();
+        router.push('/');
+      } catch (err) {
+        console.error(err);
+        toast.error(err?.response?.data?.message || 'Something went wrong');
+        setSubmitting(false);
+      }
     }
   });
 
@@ -63,15 +76,15 @@ const Home = () => {
   }, []);
 
   const getStarted = () => {
-    if (!isServer && localStorage.getItem('email')) {
-      router.push('/browse-blogs')
+    if (storedEmail) {
+      router.push('/browse-blogs');
     } else {
-      router.push('/login')
+      router.push('/login');
     }
   };
 
   return (
-    <div className="bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white">
+    <div className="bg-gradient-to-b from-black via-gray-900 to-gray-800 text-white min-h-screen">
       <motion.div
         style={{
           backgroundImage: "url('1923a4c2-ed04-4649-b726-b7a3d3d16499.jpg')",
@@ -124,18 +137,21 @@ const Home = () => {
           </q>
           <form onSubmit={thoughtForm.handleSubmit}>
             <textarea
+              aria-label="Submit your thought"
               className="mt-4 p-4 text-lg rounded-lg shadow-inner w-full bg-gray-800 text-gray-200"
               id="thought"
+              name="thought"
               onChange={thoughtForm.handleChange}
               value={thoughtForm.values.thought}
               placeholder="Submit your thought"
+              required
             />
             <button
-              type='submit'
-              className="mt-8 bg-purple-700 hover:bg-purple-900 text-white py-2 px-8 rounded-lg text-lg font-medium shadow-lg"
+              type="submit"
+              className="mt-8 bg-purple-700 hover:bg-purple-900 text-white py-2 px-8 rounded-lg text-lg font-medium shadow-lg flex items-center justify-center gap-2"
               disabled={thoughtForm.isSubmitting}
             >
-              {thoughtForm.isSubmitting ? <IconLoader3 className='animate-spin' /> : ''}
+              {thoughtForm.isSubmitting ? <IconLoader3 className="animate-spin" size={20} /> : null}
               {thoughtForm.isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
           </form>
@@ -153,7 +169,7 @@ const Home = () => {
             <motion.div
               key={vlog._id}
               whileHover={{ scale: 1.05 }}
-              className="p-4 bg-gray-900 rounded-lg shadow-lg"
+              className="p-4 bg-gray-900 rounded-lg shadow-lg max-w-xs"
             >
               <Vlog
                 id={vlog._id}
@@ -168,9 +184,7 @@ const Home = () => {
         </motion.div>
         <a
           className="block mt-8 text-center text-xl text-blue-400 hover:text-blue-600 cursor-pointer"
-          onClick={() => {
-            router.push("/browse-blogs");
-          }}
+          onClick={() => router.push("/browse-blogs")}
         >
           View More
         </a>
@@ -179,6 +193,7 @@ const Home = () => {
       <section className="py-16">
         <Testemonial />
       </section>
+
       <Footer />
     </div>
   );
