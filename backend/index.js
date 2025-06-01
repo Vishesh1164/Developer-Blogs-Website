@@ -21,7 +21,7 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000','https://developer-blogs-website.vercel.app/'],
      credentials: true, // You can add more origins or use a function for dynamic origins
   })
 );
