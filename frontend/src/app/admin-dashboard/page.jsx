@@ -13,7 +13,7 @@ const AdminDashboard = () => {
       const token = localStorage.getItem('token');
   
       if (!token) {
-        router.push('/admin-login');  // Redirect if token not found
+        router.push('/admin-login');   // Redirect if token not found
       } else {
         setLoadings(false);  // Allow page to render
       }
