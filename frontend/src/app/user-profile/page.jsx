@@ -25,6 +25,7 @@ const Userprofile = () => {
       setUserData(res.data);
       setImage(res.data.profileImage);
     } catch (err) {
+      console.log(err)
       toast.error('Please login first');
       router.push('/login');
     }
