@@ -33,7 +33,7 @@ export default function AdminLogin() {
       setError(err.response?.data?.message || 'Login failed');
     }
   };
- if (loadings) return <p>Checking token...</p>;
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
       <form
