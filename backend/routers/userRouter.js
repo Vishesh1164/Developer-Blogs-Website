@@ -179,6 +179,7 @@ router.get('/getbyid/:id', verifyToken, async (req, res) => {
 // Get logged-in user using token
 router.get('/getuser', verifyToken, async (req, res) => {
   try {
+    console.log(req.user)
     const user = await Model.findById(req.user._id).select('-password');
     res.status(200).json(user);
   } catch (err) {
