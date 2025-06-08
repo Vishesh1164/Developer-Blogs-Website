@@ -15,25 +15,9 @@ const Userprofile = () => {
   const [userData, setUserData] = useState(null);
 
   const handleEditToggle = () => setIsEditing(!isEditing);
-
+const token =localStorage.getItem('token')
   // Check login by trying to fetch user data
-  const fetchUserData = async () => {
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
-        withCredentials: true, // send cookies with request
-      });
-      setUserData(res.data);
-      setImage(res.data.profileImage);
-    } catch (err) {
-      console.log(err)
-      toast.error('Please login first');
-      router.push('/login');
-    }
-  };
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
 
   const uploadImage = async (e) => {
     const file = e.target.files[0];
