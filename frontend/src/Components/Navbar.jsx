@@ -30,6 +30,7 @@ const Navbar = () => {
   const logout = async() => {
 
     await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/logout`,{withCredentials:true})
+    console.log('hello')
     if (isServer()) {
 
 
