@@ -2,6 +2,7 @@
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import axios from 'axios'
 
 const Navbar = () => {
   const router = useRouter()
@@ -26,8 +27,12 @@ const Navbar = () => {
   }
 
   // Logout function
-  const logout = () => {
+  const logout = async() => {
+
+    await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/logout`,{withCredentials:true})
     if (isServer()) {
+
+
       localStorage.removeItem('email')
       localStorage.removeItem('src')
       localStorage.removeItem('token')
