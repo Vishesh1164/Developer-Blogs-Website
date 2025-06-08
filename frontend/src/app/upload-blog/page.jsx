@@ -87,13 +87,6 @@ const UploadBlog = () => {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex justify-center items-center text-white">
-        Checking authentication...
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-10 flex justify-center items-center">
