@@ -12,6 +12,25 @@ const BlogManagementPage = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+     const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check if user is authenticated by calling backend
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
+          withCredentials: true,
+        });
+        setIsAuthenticated(true);
+      } catch {
+        toast.error('Please login first');
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, []);
+
   // Fetch blogs of logged in user
   const fetchBlogs = async () => {
     try {
@@ -61,6 +80,14 @@ const BlogManagementPage = () => {
   useEffect(() => {
     fetchBlogs();
   }, []);
+
+    if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex justify-center items-center text-white">
+        Checking authentication...
+      </div>
+    );
+  }
 
   if (loading) {
     return (

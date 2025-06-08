@@ -19,6 +19,24 @@ const UpdateBlog = () => {
 
   const router = useRouter();
 
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check if user is authenticated by calling backend
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
+          withCredentials: true,
+        });
+        setIsAuthenticated(true);
+      } catch {
+        toast.error('Please login first');
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, []);
+
   // Fetch blog details
   const fetchBlog = async () => {
     try {
@@ -89,10 +107,11 @@ const UpdateBlog = () => {
     }
   };
 
-  if (load) {
+
+  if (!isAuthenticated) {
     return (
-      <div className="flex justify-center items-center h-screen bg-gray-900 text-gray-300">
-        <PuffLoader size={150} color="#58A6FF" loading={true} />
+      <div className="min-h-screen flex justify-center items-center text-white">
+        Checking authentication...
       </div>
     );
   }
