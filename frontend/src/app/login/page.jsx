@@ -25,17 +25,18 @@ const SignUp = () => {
         const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/authenticate`, values, {
             withCredentials: true,
         });
-
+console.log(res.data)
         toast.success('Logged in successfully!');
         if (typeof window !== 'undefined') {
-          localStorage.setItem('email', res.data.email);
-          localStorage.setItem('name', res.data.name);
-          localStorage.setItem('src', res.data.profileImage);
+          localStorage.setItem('email', res.data.user.email);
+          localStorage.setItem('name', res.data.user.name);
+          localStorage.setItem('src', res.data.user.profileImage);
+          localStorage.setItem('token',true)
         }
         resetForm();
         router.replace('/');
-      } catch (err) {
-        console.error(err);
+      } catch (err) { 
+        console.log(err);
         toast.error('Invalid username or password.');
       } finally {
         setSubmitting(false);

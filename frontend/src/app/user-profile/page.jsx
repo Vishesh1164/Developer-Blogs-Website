@@ -70,7 +70,8 @@ const Userprofile = () => {
         setIsEditing(false);
         fetchUserData();
       }
-    } catch {
+    } catch(err) {
+      console.log(err)
       toast.error('Failed to update user data!');
     } finally {
       setSubmitting(false);
@@ -113,7 +114,6 @@ const Userprofile = () => {
           initialValues={{
             name: userData?.name || '',
             email: userData?.email || '',
-            password: '',
             bio: userData?.bio || '',
           }}
           enableReinitialize
@@ -121,7 +121,7 @@ const Userprofile = () => {
         >
           {({ handleSubmit, handleChange, values, isSubmitting }) => (
             <form onSubmit={handleSubmit}>
-              {['name', 'email', 'password', 'bio'].map((field) => (
+              {['name', 'email', 'bio'].map((field) => (
                 <div key={field} className="mb-6">
                   <h2 className="text-xl font-semibold mb-2 capitalize">{field}</h2>
                   {isEditing ? (

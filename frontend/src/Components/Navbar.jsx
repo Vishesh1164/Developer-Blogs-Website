@@ -30,6 +30,7 @@ const Navbar = () => {
     if (isServer()) {
       localStorage.removeItem('email')
       localStorage.removeItem('src')
+      localStorage.removeItem('token')
     }
     setLogin(false)
     setProfileSrc('')

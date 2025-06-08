@@ -4,6 +4,8 @@ const userRouter = require('./routers/userRouter');
 const projectRouter = require('./routers/blogRouter');
 const mongoSanitize = require('express-mongo-sanitize');
 const contactRouter = require('./routers/contactRouter');
+const thoughtRouter = require('./routers/thoughtRouter');
+const adminRouter = require('./routers/adminRouter');
 const cors = require('cors');
 require('dotenv').config();
 const cookieParser = require('cookie-parser');
@@ -33,6 +35,9 @@ app.use(express.json());
 app.use('/user', userRouter);
 app.use('/blog', projectRouter);
 app.use('/contact', contactRouter);
+app.use('/thought', thoughtRouter);
+app.use('/admin', adminRouter);
+
 
 // Root route - health check
 app.get('/', (req, res) => {

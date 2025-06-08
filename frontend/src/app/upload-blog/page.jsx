@@ -70,6 +70,7 @@ const UploadBlog = () => {
         setImage(null);
         setContentValue('');
       } catch (err) {
+        console.log(err)
         toast.error(err?.response?.data?.message || 'Something went wrong');
       } finally {
         setSubmitting(false);

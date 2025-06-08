@@ -6,7 +6,7 @@ const verifyToken = require('../middleware/verifyToken');
 const router = express.Router();
 
 // Allowed fields for create/update to avoid mass assignment
-const allowedFields = ['title', 'content', 'category', 'tags'];
+const allowedFields = ['title', 'content', 'cover', 'description', 'publishedBy', 'email', 'src' ];
 
 // Helper function to sanitize tags array (optional)
 const sanitizeTags = (tags) => {
@@ -21,10 +21,15 @@ router.post(
   [
     body('title').trim().notEmpty().withMessage('Title is required'),
     body('content').trim().notEmpty().withMessage('Content is required'),
-    body('category').optional().trim(),
-    body('tags').optional().isArray().withMessage('Tags must be an array'),
+    body('description').optional().trim(),
+    body('email')
+      .optional()
+      .isEmail()
+      .withMessage('Must be a valid email'),
   ],
   async (req, res) => {
+
+    console.log(req.body)
     // Validate input
     const errors = validationResult(req);
     if (!errors.isEmpty())
@@ -73,11 +78,13 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
 
     try {
+      console.log(req.params.id)
       const blog = await Model.findById(req.params.id);
+      console.log(blog)
       if (!blog) return res.status(404).json({ message: 'Blog not found' });
 
       // Authorization check: owner or admin only
-      if (blog.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      if (blog.email.toString() !== req.user.email.toString()) {
         return res.status(403).json({ message: 'Unauthorized' });
       }
 
@@ -143,7 +150,7 @@ router.get(
 // Get all blogs - public
 router.get('/getall', async (req, res) => {
   try {
-    console.log("all blogs")
+   
     const blogs = await Model.find().sort({ createdAt: -1 });
     res.status(200).json(blogs);
   } catch (err) {
@@ -167,7 +174,7 @@ router.delete(
       if (!blog) return res.status(404).json({ message: 'Blog not found' });
 
       // Authorization check: owner or admin only
-      if (blog.userId.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
+      if (blog.email.toString() !== req.user.email.toString()) {
         return res.status(403).json({ message: 'Unauthorized' });
       }
 
@@ -183,21 +190,15 @@ router.delete(
 // Get blogs by author's email - public (if email is stored on blog docs)
 // You may need to store email on blog creation if you want to use this
 router.get(
-  '/getbyemail/:email',
-  [
-    param('email')
-      .trim()
-      .isEmail()
-      .withMessage('Valid email is required')
-      .normalizeEmail(),
-  ],
+  '/getbyemail',
+  verifyToken,
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
 
     try {
-      const blogs = await Model.find({ email: req.params.email });
+      const blogs = await Model.find({ email: req.user.email });
       res.status(200).json(blogs);
     } catch (err) {
       console.error(err);

@@ -64,7 +64,7 @@ const Home = () => {
         resetForm();
         router.push('/');
       } catch (err) {
-        console.error(err);
+        console.log(err);
         toast.error(err?.response?.data?.message || 'Something went wrong');
         setSubmitting(false);
       }

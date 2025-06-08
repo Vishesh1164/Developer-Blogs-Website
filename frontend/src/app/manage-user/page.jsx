@@ -10,9 +10,23 @@ const ManageUser = () => {
   const [userList, setUserList] = useState([])
   const [loading, setloading] = useState(false)
   
+
+   const [loadings, setLoadings] = useState(true);
+    const router = useRouter();
+  
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+  
+      if (!token) {
+        router.push('/admin-login');  // Redirect if token not found
+      } else {
+        setLoadings(false);  // Allow page to render
+      }
+    }, []);
+
   const fetchUsers = async () =>{
     setloading(true)
-    const res= await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getall`)
+    const res= await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/admin/getall`,{withCredentials:true})
     console.log(res.data)
     setUserList(res.data)
     setloading(false)
@@ -25,7 +39,7 @@ const ManageUser = () => {
   const deleteUser = async (id) => {
     if (!confirm('Are you sure you want to delete?')) return
 
-    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/user/delete/${id}`)
+    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/admin/delete/${id}`,{withCredentials:true})
     if (res.status === 200) {
       fetchUsers(res)
       toast.success('User deleted successfully')
@@ -33,7 +47,7 @@ const ManageUser = () => {
       toast.error('Failed to delete user')
     }
   }
-
+ if (loadings) return <p>Checking token...</p>;
   return (
     <div className="h-screen bg-gray-900 text-white">
       <h1 className="text-center text-3xl font-bold py-5">Manage Users</h1>

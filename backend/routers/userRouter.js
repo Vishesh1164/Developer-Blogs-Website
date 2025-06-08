@@ -187,90 +187,83 @@ router.get('/getuser', verifyToken, async (req, res) => {
 });
 
 // Get all users - only admin
-router.get('/getall', verifyToken, authorizeRoles('admin'), async (req, res) => {
-  try {
-    const users = await Model.find().select('-password');
-    res.status(200).json(users);
-  } catch (err) {
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 // Delete user - only admin
-router.delete('/delete/:id', verifyToken, authorizeRoles('admin'), async (req, res) => {
-  try {
-    const result = await Model.findByIdAndDelete(req.params.id);
-    if (!result) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    res.status(200).json({ message: 'User deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
-// Update user profile - user can update only own profile (except role)
-router.put('/update', 
-  verifyToken, 
+
+
+
+router.put(
+  '/update',
+  verifyToken,
+
+  // ✅ Validation (only if field is present)
   [
-    body('name').optional().trim().notEmpty().withMessage('Name cannot be empty'),
-    body('email').optional().isEmail().withMessage('Must be a valid email'),
-    // add validation for profileImage if needed
+    body('name')
+      .optional()
+      .trim()
+      .notEmpty()
+      .withMessage('Name cannot be empty'),
+    body('email')
+      .optional()
+      .isEmail()
+      .withMessage('Must be a valid email'),
+    body('bio')
+      .optional()
+      .isLength({ max: 500 })
+      .withMessage('Bio must be less than 500 characters'),
+    // You can add validation for profileImage if needed
   ],
+
   async (req, res) => {
+    // ✅ Check for validation errors
+    const allowedUpdates = ['name', 'email', 'bio', 'profileImage',];
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log("Validation Errors:", errors.array());
       return res.status(400).json({ errors: errors.array() });
     }
 
+    // ✅ Prevent updating role manually
+    if ('role' in req.body) {
+      return res.status(403).json({ message: 'Role cannot be updated directly' });
+    }
+
+    // ✅ Check if all keys are allowed
+    const updates = Object.keys(req.body);
+    const isValidOperation = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidOperation) {
+      console.log(req.body)
+      return res.status(400).json({ message: 'Invalid updates!' });
+    }
+
     try {
-      if ('role' in req.body) {
-        return res.status(403).json({ message: 'Role cannot be updated directly' });
-      }
-
-      const updates = Object.keys(req.body);
-      const isValidOperation = updates.every((update) => allowedUpdates.includes(update));
-      if (!isValidOperation) {
-        return res.status(400).json({ message: 'Invalid updates!' });
-      }
-
       const updatedUser = await Model.findByIdAndUpdate(
         req.user._id,
         req.body,
-        { new: true, runValidators: true }
-      ).select('-password');
+        {
+          new: true,          // return updated document
+          runValidators: true // validate based on schema
+        }
+      ).select('-password'); // don't return password in response
 
+      if (!updatedUser) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      console.log("✅ User updated successfully");
       res.status(200).json(updatedUser);
     } catch (err) {
-      console.error(err);
+      console.error("Update error:", err);
       res.status(500).json({ message: 'Internal Server Error' });
     }
   }
 );
 
-// Admin can update role of user
-router.put('/updateRole/:id', verifyToken, authorizeRoles('admin'), async (req, res) => {
-  try {
-    const { role } = req.body;
-    if (!role || !['user', 'admin'].includes(role)) {
-      return res.status(400).json({ message: 'Invalid role' });
-    }
 
-    const updatedUser = await Model.findByIdAndUpdate(
-      req.params.id,
-      { role },
-      { new: true, runValidators: true }
-    ).select('-password');
 
-    if (!updatedUser) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    res.status(200).json(updatedUser);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Internal Server Error' });
-  }
-});
 
 module.exports = router;

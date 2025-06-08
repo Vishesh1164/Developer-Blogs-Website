@@ -10,9 +10,22 @@ const Managethought = () => {
   const [thoughtList, setthoughtList] = useState([])
   const [loading, setloading] = useState(false)
   
+
+   const [loadings, setLoadings] = useState(true);
+    const router = useRouter();
+  
+    useEffect(() => {
+      const token = localStorage.getItem('token');
+  
+      if (!token) {
+        router.push('/admin-login');  // Redirect if token not found
+      } else {
+        setLoadings(false);  // Allow page to render
+      }
+    }, []);
   const fetchthoughts = async () =>{
     setloading(true)
-    const res= await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/thought/getall`)
+    const res= await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/thought/getall`,{withCredentials:true})
     console.log(res.data)
     setthoughtList(res.data)
     setloading(false)
@@ -25,7 +38,7 @@ const Managethought = () => {
   const deletethought = async (id) => {
     if (!confirm('Are you sure you want to delete?')) return
 
-    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/thought/delete/${id}`)
+    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/thought/delete/${id}`,{withCredentials:true})
     if (res.status === 200) {
       fetchthoughts(res)
       toast.success('thought deleted successfully')
@@ -33,7 +46,7 @@ const Managethought = () => {
       toast.error('Failed to delete thought')
     }
   }
-
+ if (loadings) return <p>Checking token...</p>;
   return (
     <div className="h-screen bg-gray-900 text-white">
       <h1 className="text-center text-3xl font-bold py-5">Manage thoughts</h1>

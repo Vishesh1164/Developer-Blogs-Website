@@ -10,25 +10,30 @@ const router = express.Router();
 router.post('/add',
     verifyToken,
     [
-        body('title').notEmpty().withMessage('Title is required'),
-        body('content').notEmpty().withMessage('Content is required'),
+        body('name').notEmpty().withMessage('Name is required'),
+           body('email')
+              .optional()
+              .isEmail()
+              .withMessage('Must be a valid email'),
+        body('thought').notEmpty().withMessage('Content is required'),
     ],
     async (req, res) => {
+      
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+       
 
         try {
-            const { title, content } = req.body;
-            const thought = new Model({
-                title,
-                content,
-                userId: req.user._id,
-                email: req.user.email,
+            const { name, email, thought } = req.body;
+            const thoughts = new Model({
+               name,
+                email,
+                thought
             });
 
-            const result = await thought.save();
+            const result = await thoughts.save();
             res.status(201).json(result);
         } catch (err) {
             console.error(err);

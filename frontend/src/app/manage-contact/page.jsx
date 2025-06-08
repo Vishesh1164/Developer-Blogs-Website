@@ -2,6 +2,7 @@
 import { IconCarCrash, IconPencil, IconTrash } from '@tabler/icons-react'
 import axios from 'axios'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 
@@ -10,9 +11,25 @@ const ManageContact = () => {
   const [contactList, setContactList] = useState([])
   const [loading, setLoading] = useState(false)
 
+
+ const [loadings, setLoadings] = useState(true);
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      router.push('/admin-login');  // Redirect if token not found
+    } else {
+      setLoadings(false);  // Allow page to render
+    }
+  }, []);
+
+ 
+
   const fetchContacts = async () => {
     setLoading(true)
-    const res = await axios.get('http://localhost:5000/contact/getall')
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contact/getall`,{withCredentials:true})
     console.log(res.data)
     setContactList(res.data)
     setLoading(false)
@@ -25,7 +42,7 @@ const ManageContact = () => {
   const deleteContact = async (id) => {
     if (!confirm('Are you sure you want to delete?')) return
 
-    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/contact/delete/${id}`)
+    const res = await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/contact/delete/${id}`,{withCredentials:true})
     if (res.status === 200) {
       fetchContacts()
       toast.success('Contact deleted successfully')
@@ -33,7 +50,7 @@ const ManageContact = () => {
       toast.error('Failed to delete contact')
     }
   }
-
+ if (loadings) return <p>Checking token...</p>;
   return (
     <div className="h-screen bg-gray-900 text-white">
       <h1 className="text-center text-3xl font-bold py-5">Manage Contact Us Form</h1>

@@ -37,6 +37,7 @@ const SignUp = () => {
     },
     validationSchema: SignupSchema,
     onSubmit: (values, { resetForm, setSubmitting }) => {
+      console.log("hihihhihih")
       axios
         .post(`${process.env.NEXT_PUBLIC_API_URL}/user/add`, values)
         .then(() => {
@@ -45,6 +46,7 @@ const SignUp = () => {
           router.push('/login');
         })
         .catch((err) => {
+          console.log(err)
           toast.error(err?.response?.data?.message || 'Something went wrong');
           setSubmitting(false);
         });

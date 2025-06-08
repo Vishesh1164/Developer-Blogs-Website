@@ -21,7 +21,7 @@ const ContactUs = () => {
     onSubmit: (values, { resetForm, setSubmitting }) => {
       console.log(values);
 
-      axios.post('http://localhost:5000/contact/add', values)
+      axios.post(`${process.env.NEXT_PUBLIC_API_URL}/contact/add`, values,{withCredentials:true})
         .then((result) => {
           toast.success('Sent successfully');
           resetForm();
