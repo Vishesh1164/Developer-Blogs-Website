@@ -127,7 +127,7 @@ router.post('/authenticate',
           res.cookie('token', token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'None',
             maxAge: 6 * 60 * 60 * 1000, // 6 hours
           });
           res.status(200).json({ user: { name: user.name, email: user.email, profileImage: user.profileImage, role: user.role } });
