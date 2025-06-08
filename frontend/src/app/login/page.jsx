@@ -29,6 +29,7 @@ console.log(res.data)
         toast.success('Logged in successfully!');
         if (typeof window !== 'undefined') {
           console.log('hello')
+          console.log(res.user)
           localStorage.setItem('email', res.data.user.email);
           localStorage.setItem('name', res.data.user.name);
           localStorage.setItem('src', res.data.user.profileImage);
