@@ -27,7 +27,21 @@ const UploadBlog = () => {
   const [userData, setUserData] = useState(null);
 
   // Check if user is authenticated by calling backend
-
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
+          withCredentials: true,
+        });
+        setIsAuthenticated(true);
+        setUserData(res.data);
+      } catch {
+        toast.error('Please login first');
+        router.push('/login');
+      }
+    };
+    checkAuth();
+  }, []);
 
   const uploadBlog = useFormik({
     initialValues: {
@@ -87,6 +101,13 @@ const UploadBlog = () => {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex justify-center items-center text-white">
+        Checking authentication...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-10 flex justify-center items-center">
