@@ -44,7 +44,7 @@ const Navbar = () => {
   }
 
   // Redirect to login page
-  const Login = () => {
+  const Login = () =>  {
     router.push('/login')
   }
 
