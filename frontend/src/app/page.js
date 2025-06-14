@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import Carousal from '../Components/Carousal';
 import Vlog from '../Components/Vlog';
-import Testemonial from '../Components/Testemonial';  // fixed typo here if any
+import Testemonial from '../Components/Testemonial';
 import Footer from '../Components/Footer';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
@@ -15,11 +15,11 @@ import { IconLoader3 } from '@tabler/icons-react';
 const Home = () => {
   const router = useRouter();
   const [latest, setLatest] = useState([]);
+  const [loading, setLoading] = useState(true); // spinner state
   const { ref: featuredRef, inView: featuredInView } = useInView();
   const { ref: thoughtRef, inView: thoughtInView } = useInView();
   const { ref: vlogsRef, inView: vlogsInView } = useInView();
 
-  // States to hold localStorage values after mount (to avoid SSR issues)
   const [storedName, setStoredName] = useState('');
   const [storedEmail, setStoredEmail] = useState('');
   const [token, setToken] = useState('');
@@ -33,6 +33,7 @@ const Home = () => {
   }, []);
 
   const fetchBlog = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall`);
       if (res.status === 200) {
@@ -40,11 +41,13 @@ const Home = () => {
       }
     } catch (error) {
       console.log("Error fetching blogs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const thoughtForm = useFormik({
-    enableReinitialize: true, // important to update initialValues on token change
+    enableReinitialize: true,
     initialValues: {
       name: storedName,
       email: storedEmail,
@@ -121,7 +124,13 @@ const Home = () => {
           animate={featuredInView ? { opacity: 1, x: 0, transition: { duration: 0.8, delay: 0.2 } } : {}}
           className="max-w-lg mx-auto"
         >
-          <Carousal blogList={latest} />
+          {loading ? (
+            <div className="flex justify-center items-center h-40">
+              <IconLoader3 className="animate-spin text-white" size={40} />
+            </div>
+          ) : (
+            <Carousal blogList={latest} />
+          )}
         </motion.div>
       </section>
 
@@ -165,22 +174,28 @@ const Home = () => {
           initial={{ opacity: 0 }}
           animate={vlogsInView ? { opacity: 1, transition: { staggerChildren: 0.2 } } : {}}
         >
-          {latest.map((vlog) => (
-            <motion.div
-              key={vlog._id}
-              whileHover={{ scale: 1.05 }}
-              className="p-4 bg-gray-900 rounded-lg shadow-lg max-w-xs"
-            >
-              <Vlog
-                id={vlog._id}
-                title={vlog.title}
-                description={vlog.description}
-                cover={vlog.cover}
-                user={vlog.publishedBy}
-                src={vlog.src}
-              />
-            </motion.div>
-          ))}
+          {loading ? (
+            <div className="flex justify-center items-center h-40 w-full">
+              <IconLoader3 className="animate-spin text-white" size={40} />
+            </div>
+          ) : (
+            latest.map((vlog) => (
+              <motion.div
+                key={vlog._id}
+                whileHover={{ scale: 1.05 }}
+                className="p-4 bg-gray-900 rounded-lg shadow-lg max-w-xs"
+              >
+                <Vlog
+                  id={vlog._id}
+                  title={vlog.title}
+                  description={vlog.description}
+                  cover={vlog.cover}
+                  user={vlog.publishedBy}
+                  src={vlog.src}
+                />
+              </motion.div>
+            ))
+          )}
         </motion.div>
         <a
           className="block mt-8 text-center text-xl text-blue-400 hover:text-blue-600 cursor-pointer"
