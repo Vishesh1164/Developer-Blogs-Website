@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { IconUsers, IconMessageCircle, IconEdit } from '@tabler/icons-react'
 import { useRouter } from 'next/navigation'
+import Cookies from 'js-cookie'
 
 const AdminDashboard = () => {
 
@@ -10,7 +11,7 @@ const AdminDashboard = () => {
     const router = useRouter();
   
     useEffect(() => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
   
       if (!token) {
         router.push('/admin-login');   // Redirect if token not found

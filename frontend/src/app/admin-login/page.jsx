@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -24,8 +25,8 @@ export default function AdminLogin() {
       );
 
       if (res.status === 200) {
-        localStorage.setItem('token',true)
-        localStorage.setItem('role','admin')
+        Cookies.set('token',true)
+        Cookies.set('role','admin')
 
         router.push('/admin-dashboard');
       }

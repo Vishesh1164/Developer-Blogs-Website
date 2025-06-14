@@ -3,6 +3,7 @@
 import { IconBrandGoogle, IconCheck, IconLoader3 } from '@tabler/icons-react';
 import axios from 'axios';
 import { useFormik } from 'formik';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import toast from 'react-hot-toast';
@@ -30,10 +31,10 @@ console.log(res.data)
         if (typeof window !== 'undefined') {
           console.log('hello')
           console.log(res.user)
-          localStorage.setItem('email', res.data.user.email);
-          localStorage.setItem('name', res.data.user.name);
-          localStorage.setItem('src', res.data.user.profileImage);
-          localStorage.setItem('token',true)
+          Cookies.set('email', res.data.user.email);
+          Cookies.set('name', res.data.user.name);
+          Cookies.set('src', res.data.user.profileImage);
+          Cookies.set('token',true)
         }
         resetForm();
         router.replace('/');

@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import axios from 'axios'
+import Cookies from 'js-cookie'
 
 const Navbar = () => {
   const router = useRouter()
@@ -19,8 +20,8 @@ const Navbar = () => {
   // Check login status and set profile image
   const toggleLogin = () => {
     if (isServer()) {
-      const email = localStorage.getItem('email')
-      const src = localStorage.getItem('src')
+      const email = Cookies.get('email')
+      const src = Cookies.get('src')
       setLogin(!!email)
       setProfileSrc(src || '')
     }
@@ -34,9 +35,9 @@ const Navbar = () => {
     if (isServer()) {
 
 
-      localStorage.removeItem('email')
-      localStorage.removeItem('src')
-      localStorage.removeItem('token')
+      Cookies.remove('email')
+      Cookies.remove('src')
+      Cookies.remove('token')
     }
     setLogin(false)
     setProfileSrc('')

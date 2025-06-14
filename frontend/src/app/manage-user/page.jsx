@@ -1,6 +1,7 @@
 'use client'
 import { IconCarCrash, IconPencil, IconTrash } from '@tabler/icons-react'
 import axios from 'axios'
+import Cookies from 'js-cookie'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -16,7 +17,7 @@ const ManageUser = () => {
     const router = useRouter();
   
     useEffect(() => {
-      const token = localStorage.getItem('token');
+      const token = Cookies.get('token');
   
       if (!token) {
         router.push('/admin-login');  // Redirect if token not found

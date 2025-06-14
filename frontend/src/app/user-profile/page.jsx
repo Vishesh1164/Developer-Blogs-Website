@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 import { Formik } from 'formik';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -15,7 +16,7 @@ const Userprofile = () => {
   const [userData, setUserData] = useState(null);
 
   const handleEditToggle = () => setIsEditing(!isEditing);
-const token =localStorage.getItem('token')
+const token =Cookies.get('token')
   // Check login by trying to fetch user data
   const fetchUserData = async () => {
      if(token){

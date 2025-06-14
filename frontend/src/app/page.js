@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import { IconLoader3 } from '@tabler/icons-react';
+import Cookies from 'js-cookie';
 
 const Home = () => {
   const router = useRouter();
@@ -26,9 +27,9 @@ const Home = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setStoredName(localStorage.getItem('name') || '');
-      setStoredEmail(localStorage.getItem('email') || '');
-      setToken(localStorage.getItem('token') || '');
+      setStoredName(Cookies.get('name') || '');
+      setStoredEmail(Cookies.get('email') || '');
+      setToken(Cookies.get('token') || '');
     }
   }, []);
 
