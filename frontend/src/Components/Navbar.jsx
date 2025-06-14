@@ -120,10 +120,10 @@ const Navbar = () => {
             >
               <ul className="space-y-2">
                 <li
-                  className="cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200"
-                  onClick={() => login ? router.push('/user-profile') : router.push('/login')}
+                  className={`${login?'':'hidden'}cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200`}
+                  onClick={() =>  router.push('/user-profile')}
                 >
-                  {login ? 'Profile' : 'Login'}
+                  {'Profile'}
                 </li>
 
                 {login && (
