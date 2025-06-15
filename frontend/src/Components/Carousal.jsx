@@ -9,7 +9,7 @@ import 'swiper/css/pagination';
 
 import Card from './Card';
 
-const BlogCarousel = ({ blogList }) => {
+const Carousel = ({ blogList }) => {
   return (
     <div className="w-full max-w-6xl mx-auto px-4 py-8">
       <Swiper
@@ -44,4 +44,4 @@ const BlogCarousel = ({ blogList }) => {
   );
 };
 
-export default BlogCarousel;
+export default Carousel;
