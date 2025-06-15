@@ -36,7 +36,9 @@ const Home = () => {
   const fetchBlog = async () => {
     setLoading(true);
     try {
+      console.time('blog')
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall`);
+      console.timeEnd('blog')
       if (res.status === 200) {
         setLatest(res.data.slice(0, 6));
       }
