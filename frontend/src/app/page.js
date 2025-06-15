@@ -11,11 +11,12 @@ import { useFormik } from 'formik';
 import toast from 'react-hot-toast';
 import { IconLoader3 } from '@tabler/icons-react';
 import Cookies from 'js-cookie';
+import Carousal from '@/Components/Carousal.jsx';
+import Vlog from '@/Components/Myblog';
+import Testemonial from '@/Components/Testemonial';
+import Footer from '@/Components/Footer';
 
-const Carousal = dynamic(() => import('@/Components/Carousal'), { ssr: false });
-const Vlog = dynamic(() => import('@/Components/Vlog'), { ssr: false });
-const Testemonial = dynamic(() => import('@/Components/Testemonial'), { ssr: false });
-const Footer = dynamic(() => import('@/Components/Footer'), { ssr: false });
+
 
 const Home = () => {
   const router = useRouter();
