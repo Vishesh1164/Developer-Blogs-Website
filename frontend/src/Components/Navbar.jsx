@@ -120,7 +120,7 @@ const Navbar = () => {
             >
               <ul className="space-y-2">
                 <li
-                  className={`${login?'':'hidden'}cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200`}
+                  className={`${login?'hidden':'hidden'} cursor-pointer p-2 rounded-md hover:bg-[#27272a] transition duration-200`}
                   onClick={() =>  router.push('/user-profile')}
                 >
                   {'Profile'}
