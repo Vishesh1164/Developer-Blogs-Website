@@ -1,11 +1,10 @@
+// pages/index.js or Home.jsx
 'use client';
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import Carousal from '../Components/Carousal';
-import Vlog from '../Components/Vlog';
-import Testemonial from '../Components/Testemonial';
-import Footer from '../Components/Footer';
+import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
@@ -13,10 +12,15 @@ import toast from 'react-hot-toast';
 import { IconLoader3 } from '@tabler/icons-react';
 import Cookies from 'js-cookie';
 
+const Carousal = dynamic(() => import('../Components/Carousal'), { ssr: false });
+const Vlog = dynamic(() => import('../Components/Vlog'), { ssr: false });
+const Testemonial = dynamic(() => import('../Components/Testemonial'), { ssr: false });
+const Footer = dynamic(() => import('../Components/Footer'), { ssr: false });
+
 const Home = () => {
   const router = useRouter();
   const [latest, setLatest] = useState([]);
-  const [loading, setLoading] = useState(true); // spinner state
+  const [loading, setLoading] = useState(true);
   const { ref: featuredRef, inView: featuredInView } = useInView();
   const { ref: thoughtRef, inView: thoughtInView } = useInView();
   const { ref: vlogsRef, inView: vlogsInView } = useInView();
@@ -26,19 +30,15 @@ const Home = () => {
   const [token, setToken] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setStoredName(Cookies.get('name') || '');
-      setStoredEmail(Cookies.get('email') || '');
-      setToken(Cookies.get('token') || '');
-    }
+    setStoredName(Cookies.get('name') || '');
+    setStoredEmail(Cookies.get('email') || '');
+    setToken(Cookies.get('token') || '');
   }, []);
 
   const fetchBlog = async () => {
     setLoading(true);
     try {
-      console.time('blog')
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getall`);
-      console.timeEnd('blog')
       if (res.status === 200) {
         setLatest(res.data.slice(0, 6));
       }
@@ -82,11 +82,7 @@ const Home = () => {
   }, []);
 
   const getStarted = () => {
-    if (storedEmail) {
-      router.push('/browse-blogs');
-    } else {
-      router.push('/login');
-    }
+    router.push(storedEmail ? '/browse-blogs' : '/login');
   };
 
   return (
@@ -108,11 +104,7 @@ const Home = () => {
         <motion.button
           onClick={getStarted}
           className="mt-8 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-2xl font-bold rounded-lg shadow-lg transition-transform transform hover:scale-105 hover:translate-x-2 hover:translate-y-2 focus:outline-none focus:ring-4 focus:ring-purple-700"
-          whileHover={{
-            scale: 1.05,
-            translateX: 5,
-            translateY: 5,
-          }}
+          whileHover={{ scale: 1.05, translateX: 5, translateY: 5 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 1 } }}
         >
@@ -163,7 +155,7 @@ const Home = () => {
               className="mt-8 bg-purple-700 hover:bg-purple-900 text-white py-2 px-8 rounded-lg text-lg font-medium shadow-lg flex items-center justify-center gap-2"
               disabled={thoughtForm.isSubmitting}
             >
-              {thoughtForm.isSubmitting ? <IconLoader3 className="animate-spin" size={20} /> : null}
+              {thoughtForm.isSubmitting && <IconLoader3 className="animate-spin" size={20} />}
               {thoughtForm.isSubmitting ? 'Submitting...' : 'Submit'}
             </button>
           </form>
@@ -200,12 +192,12 @@ const Home = () => {
             ))
           )}
         </motion.div>
-        <a
-          className="block mt-8 text-center text-xl text-blue-400 hover:text-blue-600 cursor-pointer"
-          onClick={() => router.push("/browse-blogs")}
+        <Link
+          href="/browse-blogs"
+          className="block mt-8 text-center text-xl text-blue-400 hover:text-blue-600"
         >
           View More
-        </a>
+        </Link>
       </section>
 
       <section className="py-16">
