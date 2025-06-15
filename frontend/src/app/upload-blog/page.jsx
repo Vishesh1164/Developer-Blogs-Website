@@ -1,11 +1,11 @@
-'use client'
+'use client';
 
 import dynamic from 'next/dynamic';
 import axios from 'axios';
 import { useFormik } from 'formik';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion'; 
+import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 
 if (typeof window !== 'undefined' && !window.ResizeObserver) {
@@ -21,29 +21,27 @@ const MarkdownEditor = dynamic(() => import('@uiw/react-markdown-editor'), { ssr
 const UploadBlog = () => {
   const [contentValue, setContentValue] = useState('');
   const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [loadingImage, setLoadingImage] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const router = useRouter();
 
-  // Check if user is authenticated by calling backend
   useEffect(() => {
-    const checkAuth = async () => {
+    (async () => {
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
           withCredentials: true,
         });
-        setIsAuthenticated(true);
         setUserData(res.data);
+        setIsAuthenticated(true);
       } catch {
         toast.error('Please login first');
         router.push('/login');
       }
-    };
-    checkAuth();
+    })();
   }, []);
 
-  const uploadBlog = useFormik({
+  const formik = useFormik({
     initialValues: {
       title: '',
       description: '',
@@ -55,23 +53,21 @@ const UploadBlog = () => {
     },
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       values.content = contentValue;
-      // Use userData from auth check, no localStorage
       values.email = userData?.email || '';
       values.publishedBy = userData?.name || '';
       values.src = userData?.src || '';
 
-      setSubmitting(true);
       try {
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/blog/add`, values, {
-          withCredentials: true, // send HTTP-only cookie automatically
+          withCredentials: true,
         });
         toast.success('Blog uploaded successfully!');
         resetForm();
         setImage(null);
         setContentValue('');
       } catch (err) {
-        console.log(err)
-        toast.error(err?.response?.data?.message || 'Something went wrong');
+        console.error(err);
+        toast.error(err?.response?.data?.message || 'Failed to upload blog');
       } finally {
         setSubmitting(false);
       }
@@ -80,24 +76,31 @@ const UploadBlog = () => {
 
   const uploadImage = async (e) => {
     const file = e.target.files[0];
+    if (!file?.type.startsWith('image/')) {
+      toast.error('Please upload a valid image file');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'preset2832');
     formData.append('cloud_name', 'dshlv1jgu');
-    setLoading(true);
+
+    setLoadingImage(true);
 
     try {
       const res = await axios.post(
         'https://api.cloudinary.com/v1_1/dshlv1jgu/image/upload',
         formData
       );
-      setImage(res.data.url);
-      uploadBlog.setFieldValue('cover', res.data.url);
-      toast.success('Image uploaded successfully!');
+      const url = res.data.url;
+      setImage(url);
+      formik.setFieldValue('cover', url);
+      toast.success('Image uploaded!');
     } catch {
-      toast.error('Image upload failed!');
+      toast.error('Image upload failed');
     } finally {
-      setLoading(false);
+      setLoadingImage(false);
     }
   };
 
@@ -122,11 +125,11 @@ const UploadBlog = () => {
         </h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Image Upload Section */}
+          {/* Image Upload */}
           <div className="flex-1 bg-gray-700 p-6 border-2 border-dashed border-gray-600 rounded-xl">
             <label htmlFor="image" className="cursor-pointer text-lg text-gray-400">
               <div className="text-center">
-                {loading ? (
+                {loadingImage ? (
                   <div className="animate-pulse">
                     <div className="w-12 h-12 bg-gray-500 rounded-full mx-auto" />
                   </div>
@@ -134,7 +137,7 @@ const UploadBlog = () => {
                   <img
                     src={image}
                     alt="Uploaded"
-                    className="w-full h-full object-cover rounded-xl"
+                    className="w-full h-64 object-cover rounded-xl"
                   />
                 ) : (
                   <span className="text-gray-500">Click to upload an image</span>
@@ -150,44 +153,36 @@ const UploadBlog = () => {
             </label>
           </div>
 
-          {/* Blog Details Form */}
+          {/* Form Section */}
           <div className="flex-1">
-            <form onSubmit={uploadBlog.handleSubmit} className="space-y-6">
-              <input
-                type="text"
-                id="title"
-                placeholder="Blog Title"
-                value={uploadBlog.values.title}
-                onChange={uploadBlog.handleChange}
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                required
-              />
+            <form onSubmit={formik.handleSubmit} className="space-y-6">
+              {['title', 'description'].map((field) => (
+                <input
+                  key={field}
+                  type="text"
+                  id={field}
+                  name={field}
+                  placeholder={`Enter ${field}`}
+                  value={formik.values[field]}
+                  onChange={formik.handleChange}
+                  className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
+                  required
+                />
+              ))}
 
-              <input
-                type="text"
-                id="description"
-                placeholder="Description"
-                value={uploadBlog.values.description}
-                onChange={uploadBlog.handleChange}
-                className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                required
-              />
-
-              <div className="space-y-4">
-                <div className="relative">
-                  <MarkdownEditor
-                    value={contentValue}
-                    onChange={setContentValue}
-                    className="rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 text-gray-200"
-                    minHeight={200}
-                    maxHeight={500}
-                    width="100%"
-                    style={{
-                      maxHeight: '400px',
-                      overflowY: 'auto',
-                    }}
-                  />
-                </div>
+              <div>
+                <MarkdownEditor
+                  value={contentValue}
+                  onChange={setContentValue}
+                  className="rounded-lg bg-gray-700 border border-gray-600"
+                  minHeight={200}
+                  maxHeight={500}
+                  width="100%"
+                  style={{
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                  }}
+                />
               </div>
 
               <motion.button
@@ -195,9 +190,9 @@ const UploadBlog = () => {
                 className="w-full bg-blue-600 text-white text-lg font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                disabled={uploadBlog.isSubmitting}
+                disabled={formik.isSubmitting}
               >
-                {uploadBlog.isSubmitting ? 'Uploading...' : 'Upload Blog'}
+                {formik.isSubmitting ? 'Uploading...' : 'Upload Blog'}
               </motion.button>
             </form>
           </div>

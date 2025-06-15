@@ -1,4 +1,5 @@
 'use client';
+
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
@@ -10,33 +11,33 @@ const ViewBlog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchBlog = async () => {
-    try {
-      const res = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`,
-        { withCredentials: true }
-      );
-      if (res.status === 200) {
-        setBlogDetails(res.data);
-      } else {
-        setError('Failed to fetch blog details.');
-      }
-    } catch (err) {
-      setError('Error fetching the blog details. Please try again later.');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchBlog();
+    const fetchBlog = async () => {
+      setLoading(true);
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`, {
+          withCredentials: true,
+        });
+        if (res.status === 200) {
+          setBlogDetails(res.data);
+        } else {
+          setError('Failed to fetch blog details.');
+        }
+      } catch (err) {
+        setError('Error fetching the blog details. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchBlog();
   }, [id]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-900 text-gray-300">
-        <PuffLoader size={150} color="#58A6FF" loading={loading} />
+        <PuffLoader size={150} color="#58A6FF" loading={true} />
       </div>
     );
   }
@@ -61,6 +62,7 @@ const ViewBlog = () => {
               src={blogDetails.cover}
               alt={blogDetails.title || 'Blog Cover'}
               className="w-full h-64 object-cover rounded-lg shadow-md"
+              loading="lazy"
             />
           </div>
         )}
@@ -70,9 +72,9 @@ const ViewBlog = () => {
         </div>
 
         <div className="flex items-center mt-4">
-          <div className="font-semibold text-gray-400">
+          <span className="font-semibold text-gray-400">
             Published by: <span className="text-blue-400">{blogDetails?.publishedBy}</span>
-          </div>
+          </span>
         </div>
       </div>
     </div>

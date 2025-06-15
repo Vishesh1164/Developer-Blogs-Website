@@ -7,29 +7,26 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
-import { PuffLoader } from 'react-spinners';
 
 const UpdateBlog = () => {
   const { id } = useParams();
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [blogdata, setBlogdata] = useState(null);
-  const [load, setLoad] = useState(true);
-  const [error, setError] = useState(null);
-
   const router = useRouter();
 
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [blogdata, setBlogdata] = useState(null);
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(true); // Start as true, set to false only if auth fails
 
-  // Check if user is authenticated by calling backend
+  // Check if user is authenticated
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
+        await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/getuser`, {
           withCredentials: true,
         });
-        setIsAuthenticated(true);
       } catch {
+        setIsAuthenticated(false);
         toast.error('Please login first');
         router.push('/login');
       }
@@ -37,56 +34,26 @@ const UpdateBlog = () => {
     checkAuth();
   }, []);
 
-  // Fetch blog details
-  const fetchBlog = async () => {
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`, {
-        withCredentials: true, // send HTTP-only cookies automatically
-      });
-      if (res.status === 200) {
-        setBlogdata(res.data);
-      }
-    } catch (err) {
-      console.error('Error fetching the blog:', err);
-      setError('Error fetching the blog details. Please try again later.');
-    } finally {
-      setLoad(false);
-    }
-  };
-
+  // Fetch blog data
   useEffect(() => {
+    const fetchBlog = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/blog/getbyid/${id}`, {
+          withCredentials: true,
+        });
+        setBlogdata(res.data);
+      } catch (err) {
+        setError('Failed to fetch blog. Please try again later.');
+      }
+    };
     fetchBlog();
   }, [id]);
-
-  // Update blog API call
-  const updateBlog = async (values) => {
-    // Use uploaded image if changed
-    if (image) {
-      values.profileImage = image;
-    }
-    try {
-      const res = await axios.put(
-        `${process.env.NEXT_PUBLIC_API_URL}/blog/update/${id}`,
-        values,
-        {
-          withCredentials: true, // send cookies automatically for auth
-        }
-      );
-      if (res.status === 200) {
-        toast.success('Blog updated successfully!');
-        router.push('/my-blogs');
-      } else {
-        toast.error('An error occurred during the update.');
-      }
-    } catch (err) {
-      console.error('Error updating the blog:', err);
-      toast.error('Failed to update the blog. Please try again later.');
-    }
-  };
 
   // Image upload handler
   const updateImage = async (e) => {
     const file = e.target.files[0];
+    if (!file) return;
+
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', 'preset2832');
@@ -94,19 +61,35 @@ const UpdateBlog = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post(
-        'https://api.cloudinary.com/v1_1/dshlv1jgu/image/upload',
-        formData
-      );
+      const res = await axios.post('https://api.cloudinary.com/v1_1/dshlv1jgu/image/upload', formData);
       setImage(res.data.url);
-      setLoading(false);
       toast.success('Image uploaded successfully!');
-    } catch (err) {
-      setLoading(false);
+    } catch {
       toast.error('Image upload failed!');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Update blog handler
+  const updateBlog = async (values) => {
+    const updatedValues = {
+      ...values,
+      profileImage: image || values.profileImage,
+    };
+
+    try {
+      const res = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/blog/update/${id}`,
+        updatedValues,
+        { withCredentials: true }
+      );
+      toast.success('Blog updated successfully!');
+      router.push('/my-blogs');
+    } catch (err) {
+      toast.error('Failed to update the blog. Please try again.');
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -124,6 +107,14 @@ const UpdateBlog = () => {
     );
   }
 
+  if (!blogdata) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-white flex justify-center items-center">
+        <p className="text-xl text-gray-400 animate-pulse">Loading blog data...</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-10 flex justify-center items-center">
       <motion.div
@@ -132,9 +123,7 @@ const UpdateBlog = () => {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-4xl font-semibold text-center mb-8 text-gray-100">
-          Update Blog
-        </h1>
+        <h1 className="text-4xl font-semibold text-center mb-8 text-gray-100">Update Blog</h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Image Upload */}
@@ -145,20 +134,12 @@ const UpdateBlog = () => {
                   <div className="animate-pulse">
                     <div className="w-12 h-12 bg-gray-500 rounded-full mx-auto" />
                   </div>
-                ) : image ? (
-                  <img
-                    src={image}
-                    alt="Uploaded"
-                    className="w-full h-full object-cover rounded-xl"
-                  />
-                ) : blogdata?.profileImage ? (
-                  <img
-                    src={blogdata.profileImage}
-                    alt="Current"
-                    className="w-full h-full object-cover rounded-xl"
-                  />
                 ) : (
-                  <span className="text-gray-500">Click to upload an image</span>
+                  <img
+                    src={image || blogdata.profileImage}
+                    alt="Cover"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
                 )}
               </div>
               <input
@@ -173,50 +154,43 @@ const UpdateBlog = () => {
 
           {/* Blog Form */}
           <div className="flex-1">
-            {blogdata === null ? (
-              <p className="text-center my-5 text-gray-500 font-bold text-2xl">
-                Loading, please wait...
-              </p>
-            ) : (
-              <Formik initialValues={blogdata} onSubmit={updateBlog}>
-                {(updateForm) => (
-                  <form onSubmit={updateForm.handleSubmit} className="space-y-6">
-                    <input
-                      type="text"
-                      id="title"
-                      name="title"
-                      placeholder="Blog Title"
-                      onChange={updateForm.handleChange}
-                      value={updateForm.values.title}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                    />
-                    <input
-                      type="text"
-                      id="description"
-                      name="description"
-                      placeholder="Description"
-                      onChange={updateForm.handleChange}
-                      value={updateForm.values.description}
-                      className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
-                    />
-                    <MarkdownEditor
-                      onChange={(value) => updateForm.setFieldValue('content', value)}
-                      value={updateForm.values.content}
-                      className="rounded-lg bg-gray-700 border border-gray-600 focus:ring-2 focus:ring-blue-500 text-gray-200 max-w-[500px]"
-                    />
-                    <motion.button
-                      type="submit"
-                      className="w-full bg-blue-600 text-white text-lg font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      disabled={updateForm.isSubmitting}
-                    >
-                      {updateForm.isSubmitting ? 'Updating...' : 'Update Blog'}
-                    </motion.button>
-                  </form>
-                )}
-              </Formik>
-            )}
+            <Formik initialValues={blogdata} onSubmit={updateBlog} enableReinitialize>
+              {(form) => (
+                <form onSubmit={form.handleSubmit} className="space-y-6">
+                  <input
+                    type="text"
+                    name="title"
+                    placeholder="Blog Title"
+                    onChange={form.handleChange}
+                    value={form.values.title}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
+                  />
+                  <input
+                    type="text"
+                    name="description"
+                    placeholder="Description"
+                    onChange={form.handleChange}
+                    value={form.values.description}
+                    className="w-full px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-200"
+                  />
+                  <MarkdownEditor
+                    value={form.values.content}
+                    onChange={(value) => form.setFieldValue('content', value)}
+                    className="bg-gray-700 border border-gray-600 rounded-lg text-gray-200"
+                    style={{ maxHeight: 400, overflowY: 'auto' }}
+                  />
+                  <motion.button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white text-lg font-semibold py-2 rounded-lg shadow-md hover:bg-blue-700 transition duration-300"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    disabled={form.isSubmitting}
+                  >
+                    {form.isSubmitting ? 'Updating...' : 'Update Blog'}
+                  </motion.button>
+                </form>
+              )}
+            </Formik>
           </div>
         </div>
       </motion.div>

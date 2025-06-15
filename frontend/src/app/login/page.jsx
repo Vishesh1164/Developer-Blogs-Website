@@ -24,22 +24,21 @@ const SignUp = () => {
     onSubmit: async (values, { resetForm, setSubmitting }) => {
       try {
         const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/user/authenticate`, values, {
-            withCredentials: true,
+          withCredentials: true,
         });
-console.log(res.data)
+
         toast.success('Logged in successfully!');
         if (typeof window !== 'undefined') {
-          console.log('hello')
-          console.log(res.user)
           Cookies.set('email', res.data.user.email);
           Cookies.set('name', res.data.user.name);
           Cookies.set('src', res.data.user.profileImage);
-          Cookies.set('token',true)
+          Cookies.set('token', 'true');
         }
+
         resetForm();
         router.replace('/');
-      } catch (err) { 
-        console.log(err);
+      } catch (err) {
+        console.error(err);
         toast.error('Invalid username or password.');
       } finally {
         setSubmitting(false);
@@ -48,112 +47,104 @@ console.log(res.data)
   });
 
   return (
-    <div className="w-full h-screen flex flex-col md:flex-row items-center">
-      {/* Left Image Section */}
-      <div className="relative w-full md:w-1/2 h-1/3 md:h-full hidden md:block">
-        <img src="new.jpg" alt="Background" className="w-full h-full object-cover opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0D1117] to-transparent opacity-50"></div>
-      </div>
+    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-[#161B22] p-8 rounded-2xl shadow-lg">
+        <h3 className="text-3xl font-bold text-white mb-2 text-center">Log In</h3>
+        <p className="text-sm text-gray-400 text-center mb-6">Welcome back! Please enter your details.</p>
 
-      {/* Right Login Section */}
-      <div className="w-full md:w-1/2 h-full bg-[#0D1117] flex flex-col justify-center px-6 sm:px-10 py-10">
-        <div className="max-w-[400px] mx-auto text-center">
-          <h3 className="text-3xl font-semibold text-white mb-4">Log In</h3>
-          <p className="text-sm text-[#C9D1D9] mb-4">Welcome back! Please enter your details.</p>
+        <form onSubmit={signupForm.handleSubmit} className="space-y-5" noValidate>
+          {/* Email */}
+          <div>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Email"
+              onChange={signupForm.handleChange}
+              onBlur={signupForm.handleBlur}
+              value={signupForm.values.email}
+              className="w-full py-2 px-4 text-white bg-[#0D1117] border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#58A6FF]"
+              aria-invalid={signupForm.touched.email && signupForm.errors.email ? 'true' : undefined}
+              aria-describedby="email-error"
+            />
+            {signupForm.touched.email && signupForm.errors.email && (
+              <p id="email-error" className="text-red-500 text-sm mt-1">{signupForm.errors.email}</p>
+            )}
+          </div>
 
-          <form onSubmit={signupForm.handleSubmit} className="space-y-4" noValidate>
-            <div>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                onChange={signupForm.handleChange}
-                onBlur={signupForm.handleBlur}
-                value={signupForm.values.email}
-                placeholder="Email"
-                className="w-full text-[#C9D1D9] py-2 px-4 bg-transparent border-b-2 border-white outline-none focus:ring-2 focus:ring-[#58A6FF] transition-all"
-                aria-invalid={signupForm.touched.email && signupForm.errors.email ? 'true' : undefined}
-                aria-describedby="email-error"
-              />
-              {signupForm.touched.email && signupForm.errors.email ? (
-                <p id="email-error" className="text-red-500 text-sm mt-1">
-                  {signupForm.errors.email}
-                </p>
-              ) : null}
-            </div>
+          {/* Password */}
+          <div>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              onChange={signupForm.handleChange}
+              onBlur={signupForm.handleBlur}
+              value={signupForm.values.password}
+              className="w-full py-2 px-4 text-white bg-[#0D1117] border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#58A6FF]"
+              aria-invalid={signupForm.touched.password && signupForm.errors.password ? 'true' : undefined}
+              aria-describedby="password-error"
+            />
+            {signupForm.touched.password && signupForm.errors.password && (
+              <p id="password-error" className="text-red-500 text-sm mt-1">{signupForm.errors.password}</p>
+            )}
+          </div>
 
-            <div>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                onChange={signupForm.handleChange}
-                onBlur={signupForm.handleBlur}
-                value={signupForm.values.password}
-                placeholder="Password"
-                className="w-full text-[#C9D1D9] py-2 px-4 bg-transparent border-b-2 border-white outline-none focus:ring-2 focus:ring-[#58A6FF] transition-all"
-                aria-invalid={signupForm.touched.password && signupForm.errors.password ? 'true' : undefined}
-                aria-describedby="password-error"
-              />
-              {signupForm.touched.password && signupForm.errors.password ? (
-                <p id="password-error" className="text-red-500 text-sm mt-1">
-                  {signupForm.errors.password}
-                </p>
-              ) : null}
-            </div>
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={signupForm.isSubmitting}
+            className={`w-full flex items-center justify-center py-3 text-white font-medium rounded-md transition-all ${
+              signupForm.isSubmitting ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#58A6FF] hover:bg-[#1f2937]'
+            }`}
+          >
+            {signupForm.isSubmitting ? (
+              <>
+                <IconLoader3 className="animate-spin mr-2" />
+                Verifying...
+              </>
+            ) : (
+              <>
+                <IconCheck className="mr-2" />
+                Log In
+              </>
+            )}
+          </button>
 
-            <button
-              type="submit"
-              disabled={signupForm.isSubmitting}
-              className={`w-full text-white py-3 font-semibold rounded-md flex justify-center items-center transition-all ${
-                signupForm.isSubmitting ? 'bg-gray-600 cursor-not-allowed' : 'bg-[#58A6FF] hover:bg-[#0D1117]'
-              }`}
-            >
-              {signupForm.isSubmitting ? <IconLoader3 className="animate-spin mr-2" /> : <IconCheck className="mr-2" />}
-              {signupForm.isSubmitting ? 'Verifying...' : 'Log In'}
-            </button>
+          {/* Divider */}
+          <div className="flex items-center gap-4 my-4">
+            <hr className="flex-grow border-gray-600" />
+            <span className="text-gray-400">or</span>
+            <hr className="flex-grow border-gray-600" />
+          </div>
 
-            <div className="flex items-center my-4">
-              <div className="flex-grow border-t border-[#C9D1D9]"></div>
-              <span className="text-[#C9D1D9] px-4">or</span>
-              <div className="flex-grow border-t border-[#C9D1D9]"></div>
-            </div>
+          {/* Google Login (Not Implemented) */}
+          <div
+            className="w-full flex justify-center items-center text-[#58A6FF] bg-black hover:bg-[#58A6FF] hover:text-black py-3 rounded-md cursor-pointer transition-all"
+            role="button"
+            onClick={() => toast('Google login is not implemented yet')}
+            tabIndex={0}
+            onKeyDown={(e) => ['Enter', ' '].includes(e.key) && toast('Google login is not implemented yet')}
+          >
+            <IconBrandGoogle className="h-6 mr-2" />
+            Log In with Google
+          </div>
 
-            <div
-              className="w-full text-[#58A6FF] bg-black hover:bg-[#58A6FF] hover:text-black py-3 font-semibold rounded-md flex justify-center items-center transition-all cursor-pointer"
-              onClick={() => toast('Google login is not implemented yet')}
+          {/* Sign-up redirect */}
+          <p className="text-center text-sm text-gray-400 mt-4">
+            Don’t have an account?
+            <span
+              className="text-[#58A6FF] font-semibold cursor-pointer ml-1"
+              onClick={() => router.push('/signup')}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  toast('Google login is not implemented yet');
-                }
-              }}
+              onKeyDown={(e) => ['Enter', ' '].includes(e.key) && router.push('/signup')}
             >
-              <IconBrandGoogle className="h-6 mr-2" />
-              Log In with Google
-            </div>
-
-            <div className="w-full text-center mt-6">
-              <p className="text-sm text-[#C9D1D9]">
-                Don&apos;t have an account?
-                <span
-                  onClick={() => router.push('/signup')}
-                  className="text-[#58A6FF] font-semibold cursor-pointer ml-1"
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      router.push('/signup');
-                    }
-                  }}
-                >
-                  Sign up
-                </span>
-              </p>
-            </div>
-          </form>
-        </div>
+              Sign up
+            </span>
+          </p>
+        </form>
       </div>
     </div>
   );
