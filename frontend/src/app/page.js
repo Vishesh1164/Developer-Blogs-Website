@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import { IconLoader3 } from '@tabler/icons-react';
 import Cookies from 'js-cookie';
 
-const Carousal = dynamic(() => import('../Components/Carousal'), { ssr: false });
+const Carousal = dynamic(() => import('../Components/Carousal.jsx'), { ssr: false });
 const Vlog = dynamic(() => import('../Components/Vlog'), { ssr: false });
 const Testemonial = dynamic(() => import('../Components/Testemonial'), { ssr: false });
 const Footer = dynamic(() => import('../Components/Footer'), { ssr: false });
